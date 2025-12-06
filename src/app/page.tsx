@@ -32,9 +32,9 @@ const benefits = [
 ];
 
 const demoRoles = [
-	{ label: "Enter as GL Coordinator", variant: "default" as const },
-	{ label: "Enter as Doctor", variant: "secondary" as const },
-	{ label: "Enter as Insurer", variant: "secondary" as const },
+	{ label: "Enter as GL Coordinator", variant: "default" as const, href: "/dashboard" },
+	{ label: "Enter as Doctor", variant: "secondary" as const, href: "/policies" },
+	{ label: "Enter as Insurer", variant: "secondary" as const, href: "/insurer/gls" },
 ];
 
 const howItWorks = [
@@ -70,18 +70,18 @@ export default function HomePage() {
 						/>
 					</div>
 					<nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-						<Link className="transition-colors hover:text-foreground" href="#hero">
+						<Link className="transition-colors hover:text-foreground" href="/dashboard">
 							Dashboard
 						</Link>
-						<Link className="transition-colors hover:text-foreground" href="#benefits">
+						<Link className="transition-colors hover:text-foreground" href="/policies">
 							Policies
 						</Link>
-						<Link className="transition-colors hover:text-foreground" href="#demo">
+						<Link className="transition-colors hover:text-foreground" href="/insurer/gls">
 							Insurer Portal
 						</Link>
 					</nav>
-					<Button className="hidden md:inline-flex" size="sm">
-						Enter Demo
+					<Button asChild className="hidden md:inline-flex" size="sm">
+						<Link href="/dashboard">Enter Demo</Link>
 					</Button>
 				</div>
 			</header>
@@ -107,11 +107,13 @@ export default function HomePage() {
 							</p>
 						</div>
 						<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-							<Button size="lg">
-								Cut GL processing from 48 hours to 60 seconds — try it now
+							<Button asChild size="lg">
+								<Link href="/dashboard">
+									Cut GL processing from 48 hours to 60 seconds — try it now
+								</Link>
 							</Button>
-							<Button size="lg" variant="secondary">
-								View Insurer Portal
+							<Button asChild size="lg" variant="secondary">
+								<Link href="/insurer/gls">View Insurer Portal</Link>
 							</Button>
 						</div>
 						<p className="text-xs text-muted-foreground">
@@ -192,12 +194,13 @@ export default function HomePage() {
 						<div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
 							{demoRoles.map((role) => (
 								<Button
+									asChild
 									className="flex-1"
 									key={role.label}
 									size="lg"
 									variant={role.variant}
 								>
-									{role.label}
+									<Link href={role.href}>{role.label}</Link>
 								</Button>
 							))}
 						</div>
