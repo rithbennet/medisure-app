@@ -1,178 +1,308 @@
 import { getSignUpUrl, withAuth } from "@workos-inc/authkit-nextjs";
+import Image from "next/image";
 import Link from "next/link";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+const problemBullets = [
+	"99% of specialists face insurer/TPA interference in clinical decisions (CodeBlue 2025).",
+	"GL approvals often take 24–48 hours via fax or email.",
+	"GLs are sometimes revoked after surgery, causing financial disputes.",
+];
+
+const benefits = [
+	{
+		title: "Auto-GL Risk Analysis",
+		description: "Instantly flags high-risk cases and pre-existing condition issues.",
+	},
+	{
+		title: "Policy Intelligence (RAG)",
+		description:
+			"Reads insurer policy PDFs and answers coverage questions on demand.",
+	},
+	{
+		title: "Smart Forms & Letters",
+		description: "Auto-fills GL forms and drafts doctor justification letters.",
+	},
+];
+
+const demoRoles = [
+	{ label: "Enter as GL Coordinator", variant: "default" as const },
+	{ label: "Enter as Doctor", variant: "secondary" as const },
+	{ label: "Enter as Insurer", variant: "secondary" as const },
+];
+
+const howItWorks = [
+	{
+		title: "Fill GL Form",
+		body: "Diagnosis, symptom date, treatment details.",
+	},
+	{
+		title: "AI Risk Assessment",
+		body: "Predicts approval probability + reason.",
+	},
+	{
+		title: "Submit / Simulate",
+		body: "Approve, request more info, or reject (demo mode).",
+	},
+];
+
+const techStack = ["Next.js", "Convex", "OpenAI", "Vector Search"];
 
 export default async function HomePage() {
-  const { user } = await withAuth();
-  const signUpUrl = await getSignUpUrl();
+	const { user } = await withAuth();
+	const signUpUrl = await getSignUpUrl();
 
-  return (
-    <main className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-[#2563eb] text-white shadow-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20">
-              <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <span className="text-lg font-semibold">PreApproval</span>
-          </div>
-          <h1 className="hidden text-lg font-semibold sm:block">Insurance Preapproval Automation</h1>
-          <div className="w-10" /> {/* Spacer for balance */}
-        </div>
-      </header>
+	return (
+		<div className="min-h-screen bg-gray-50 text-foreground">
+			<header className="absolute top-0 left-0 right-0 z-50 bg-transparent">
+				<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+					<div className="flex items-center gap-3">
+						<Image
+							alt="Medisure GL logo"
+							className="h-10 w-auto"
+							height={40}
+							priority
+							src="/logo.png"
+							width={120}
+						/>
+					</div>
+					<nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
+						{user ? (
+							<Link className="transition-colors hover:text-foreground" href="/dashboard">
+								Dashboard
+							</Link>
+						) : (
+							<Link className="transition-colors hover:text-foreground" href="#hero">
+								Dashboard
+							</Link>
+						)}
+						<Link className="transition-colors hover:text-foreground" href="#benefits">
+							Policies
+						</Link>
+						<Link className="transition-colors hover:text-foreground" href="#demo">
+							Insurer Portal
+						</Link>
+					</nav>
+					{user ? (
+						<Button className="hidden md:inline-flex" size={"sm" as const} asChild>
+							<Link href="/dashboard">
+								Go to Dashboard
+							</Link>
+						</Button>
+					) : (
+						<Button className="hidden md:inline-flex" size={"sm" as const} asChild>
+							<Link href={signUpUrl}>
+								Enter Demo
+							</Link>
+						</Button>
+					)}
+				</div>
+			</header>
 
-      {/* Main Content */}
-      <div className="flex flex-1 items-center justify-center px-6 py-16">
-        <div className="w-full max-w-lg">
-          {/* Hero Card */}
-          <div className="rounded-2xl bg-white p-8 shadow-sm">
-            {/* Icon */}
-            <div className="mb-6 flex justify-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-linear-to-br from-[#2563eb] to-[#1d4ed8] shadow-lg">
-                <svg className="h-10 w-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
-                </svg>
-              </div>
-            </div>
+			<main>
+				<section
+					className="relative overflow-hidden gradient-purple"
+					id="hero"
+				>
+					<div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 pt-32 pb-20 text-center">
+						<h1 className="text-hero text-gray-900 tracking-tight">
+							Radically faster GL processing
+						</h1>
+						<div className="space-y-2 text-lg text-muted-foreground">
+							<p>
+								Apply AI to cut Guarantee Letter processing from{" "}
+								<span className="line-through">48 hours</span> →{" "}
+								<span className="font-semibold text-blue-600">60 seconds</span>.
+							</p>
+							<p>
+								Medisure reads policy PDFs, predicts rejection risk, and drafts
+								justification letters instantly.
+							</p>
+						</div>
+						<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+							{user ? (
+								<Button size={"lg" as const} asChild>
+									<Link href="/dashboard">
+										Go to Dashboard
+									</Link>
+								</Button>
+							) : (
+								<Button size={"lg" as const} asChild>
+									<Link href={signUpUrl}>
+										Cut GL processing from 48 hours to 60 seconds — try it now
+									</Link>
+								</Button>
+							)}
+							<Button size={"lg" as const} variant="secondary" asChild>
+								<Link href="#demo">
+									View Insurer Portal
+								</Link>
+							</Button>
+						</div>
+						<p className="text-xs text-muted-foreground">
+							Demo only — no real patient data.
+						</p>
+					</div>
+				</section>
 
-            {/* Title */}
-            <h2 className="mb-2 text-center text-2xl font-bold text-gray-900">
-              Welcome to PreApproval
-            </h2>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-amber-400" />
-            <p className="mb-8 text-center text-gray-600">
-              Streamline your insurance preapproval process with our automated system. 
-              Fast, secure, and efficient authorization management.
-            </p>
+				<section
+					className="mx-auto max-w-5xl px-6 py-16"
+					id="problem"
+				>
+					<div className="mb-8 space-y-4">
+						<p className="uppercase text-xs tracking-widest text-muted-foreground">
+							The Problem
+						</p>
+						<h2 className="text-section-title max-w-3xl text-gray-900">
+							The GL process in Malaysia is slow, manual, and unpredictable.
+						</h2>
+					</div>
+					<Card className="bg-white shadow-soft-md">
+						<CardContent className="space-y-4 p-6 text-base text-muted-foreground">
+							{problemBullets.map((item) => (
+								<div className="flex gap-3" key={item}>
+									<div className="mt-1 h-2 w-2 rounded-full bg-blue-600" />
+									<p>{item}</p>
+								</div>
+							))}
+						</CardContent>
+					</Card>
+				</section>
 
-            {user ? (
-              /* Logged In State */
-              <div className="space-y-6">
-                <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-                      <svg className="h-5 w-5 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-emerald-800">Signed in as</p>
-                      <p className="font-semibold text-emerald-900">{user.email}</p>
-                    </div>
-                  </div>
-                </div>
+				<section
+					className="bg-white/70 py-16"
+					id="benefits"
+				>
+					<div className="mx-auto flex max-w-5xl flex-col gap-10 px-6">
+						<div className="space-y-4 text-center">
+							<p className="uppercase text-xs tracking-widest text-muted-foreground">
+								What Medisure Does
+							</p>
+							<h2 className="text-section-title text-gray-900">
+								Three simple ways Medisure automates GL work
+							</h2>
+						</div>
+						<div className="grid gap-6 md:grid-cols-3">
+							{benefits.map((benefit) => (
+								<Card className="h-full shadow-soft" key={benefit.title}>
+									<CardHeader>
+										<CardTitle className="text-card-title text-gray-900">
+											{benefit.title}
+										</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<CardDescription className="text-base text-muted-foreground">
+											{benefit.description}
+										</CardDescription>
+									</CardContent>
+								</Card>
+							))}
+						</div>
+					</div>
+				</section>
 
-                <div className="space-y-3">
-                  <Link
-                    href="/dashboard"
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#2563eb] px-6 py-3 font-semibold text-white transition hover:bg-[#1d4ed8]"
-                  >
-                    Go to Dashboard
-                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </Link>
-                  <a
-                    href="/auth/signout"
-                    className="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-50"
-                  >
-                    Sign out
-                  </a>
-                </div>
-              </div>
-            ) : (
-              /* Logged Out State */
-              <div className="space-y-6">
-                {/* Features List */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-gray-600">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100">
-                      <svg className="h-3.5 w-3.5 text-[#2563eb]" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    Submit preapproval requests in minutes
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-600">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100">
-                      <svg className="h-3.5 w-3.5 text-[#2563eb]" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    Real-time status tracking
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-600">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100">
-                      <svg className="h-3.5 w-3.5 text-[#2563eb]" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    Secure document management
-                  </div>
-                </div>
+				<section
+					className="bg-gradient-to-b from-gray-50 to-blue-50 px-6 py-16"
+					id="demo"
+				>
+					<div className="mx-auto flex max-w-4xl flex-col gap-10 text-center">
+						<div className="space-y-4">
+							<p className="uppercase text-xs tracking-widest text-muted-foreground">
+								Demo Entry Paths
+							</p>
+							<h2 className="text-section-title text-gray-900">
+								Choose how you enter the Medisure demo
+							</h2>
+						</div>
+						<div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+							{demoRoles.map((role) => (
+								<Button
+									className="flex-1"
+									key={role.label}
+									size={"lg" as const}
+									variant={role.variant}
+									asChild
+								>
+									<Link href={user ? "/dashboard" : signUpUrl}>
+										{role.label}
+									</Link>
+								</Button>
+							))}
+						</div>
+						<p className="text-sm text-muted-foreground">
+							{user ? "Welcome back!" : "No login required."}
+						</p>
+					</div>
+				</section>
 
-                <hr className="border-gray-200" />
+				<section className="bg-white px-6 py-16">
+					<div className="mx-auto flex max-w-5xl flex-col gap-10">
+						<div className="space-y-4 text-center">
+							<p className="uppercase text-xs tracking-widest text-muted-foreground">
+								How It Works
+							</p>
+							<h2 className="text-section-title text-gray-900">
+								Three simple steps to simulate a GL decision
+							</h2>
+						</div>
+						<div className="grid gap-6 md:grid-cols-3">
+							{howItWorks.map((step, index) => (
+								<Card className="relative h-full shadow-soft" key={step.title}>
+									<CardHeader className="space-y-4">
+										<div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
+											{index + 1}
+										</div>
+										<CardTitle className="text-card-title text-gray-900">
+											{step.title}
+										</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<CardDescription className="text-base text-muted-foreground">
+											{step.body}
+										</CardDescription>
+									</CardContent>
+								</Card>
+							))}
+						</div>
+					</div>
+				</section>
 
-                {/* Auth Buttons */}
-                <div className="space-y-3">
-                  <a
-                    href={signUpUrl}
-                    className="flex w-full items-center justify-center rounded-lg bg-[#2563eb] px-6 py-3 font-semibold text-white transition hover:bg-[#1d4ed8]"
-                  >
-                    Create an Account
-                  </a>
-                  <a
-                    href="/auth/signin"
-                    className="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-50"
-                  >
-                    Sign In
-                  </a>
-                </div>
+				<section className="bg-gray-50 px-6 py-16">
+					<div className="mx-auto flex max-w-4xl flex-col items-center gap-6 text-center">
+						<p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+							Tech Stack
+						</p>
+						<p className="text-lg text-muted-foreground">
+							Built with a proven stack aligned to healthcare-grade infra.
+						</p>
+						<div className="flex flex-wrap items-center justify-center gap-4">
+							{techStack.map((tech) => (
+								<span
+									className="rounded-full border border-gray-200 bg-white px-5 py-2 text-sm text-gray-900 shadow-soft"
+									key={tech}
+								>
+									{tech}
+								</span>
+							))}
+						</div>
+					</div>
+				</section>
+			</main>
 
-                <p className="text-center text-xs text-gray-500">
-                  By signing up, you agree to our Terms of Service and Privacy Policy
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Info Cards */}
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-[#2563eb] hover:shadow-md">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                <svg className="h-5 w-5 text-[#2563eb]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="mb-1 font-semibold text-gray-900">Fast Processing</h3>
-              <p className="text-sm text-gray-600">
-                Get preapproval decisions faster with our automated workflow system.
-              </p>
-            </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-[#2563eb] hover:shadow-md">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
-                <svg className="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="mb-1 font-semibold text-gray-900">Secure & Compliant</h3>
-              <p className="text-sm text-gray-600">
-                HIPAA-compliant platform ensuring your medical data stays protected.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white py-6">
-        <div className="mx-auto max-w-7xl px-6 text-center text-sm text-gray-500">
-          <p>© 2024 PreApproval. All rights reserved.</p>
-          <p className="mt-1">Streamlining healthcare insurance authorization.</p>
-        </div>
-      </footer>
-    </main>
-  );
+			<footer className="border-t border-gray-200 bg-white">
+				<div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+					<span>Medisure — Smart GL Automation</span>
+					<span>Medisure Team</span>
+					<span>© 2025</span>
+				</div>
+			</footer>
+		</div>
+	);
 }

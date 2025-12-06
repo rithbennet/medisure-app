@@ -125,7 +125,7 @@ export function DashboardContent({ workosId, email, fullName }: DashboardContent
             href="/auth/signout"
             className="rounded-lg px-4 py-2 text-sm font-medium transition hover:bg-white/10"
           >
-            Exit
+            Sign Out
           </a>
         </div>
       </header>

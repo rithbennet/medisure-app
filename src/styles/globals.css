@@ -1,7 +1,169 @@
 @import "tailwindcss";
 
 @theme {
+	/* Font Family */
 	--font-sans:
-		var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+		var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif,
 		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+	/* shadcn/ui CSS Variables - Mapped to Design System */
+	--background: 247 248 250; /* #f7f8fa */
+	--foreground: 31 41 55; /* #1f2937 - Even darker for better readability */
+	
+	--card: 255 255 255;
+	--card-foreground: 31 41 55; /* #1f2937 */
+	
+	--popover: 255 255 255;
+	--popover-foreground: 31 41 55; /* #1f2937 */
+	
+	--primary: 62 99 246; /* #3e63f6 - Primary blue */
+	--primary-foreground: 255 255 255;
+	
+	--secondary: 247 248 250; /* #f7f8fa */
+	--secondary-foreground: 31 41 55; /* #1f2937 */
+	
+	--muted: 247 248 250; /* #f7f8fa */
+	--muted-foreground: 55 65 81; /* #374151 - Darker muted text for better readability */
+	
+	--accent: 247 248 250; /* #f7f8fa */
+	--accent-foreground: 13 15 20;
+	
+	--destructive: 220 58 58; /* #dc3a3a */
+	--destructive-foreground: 255 255 255;
+	
+	--border: 227 228 232; /* #e3e4e8 */
+	--input: 227 228 232; /* #e3e4e8 */
+	--ring: 62 99 246; /* #3e63f6 */
+	
+	--radius: 0.5rem; /* 8px - default border radius */
+
+	/* TailwindCSS v4 color definitions for utilities */
+	--color-background: rgb(var(--background));
+	--color-foreground: rgb(var(--foreground));
+	--color-card: rgb(var(--card));
+	--color-card-foreground: rgb(var(--card-foreground));
+	--color-popover: rgb(var(--popover));
+	--color-popover-foreground: rgb(var(--popover-foreground));
+	--color-primary: rgb(var(--primary));
+	--color-primary-foreground: rgb(var(--primary-foreground));
+	--color-secondary: rgb(var(--secondary));
+	--color-secondary-foreground: rgb(var(--secondary-foreground));
+	--color-muted: rgb(var(--muted));
+	--color-muted-foreground: rgb(var(--muted-foreground));
+	--color-accent: rgb(var(--accent));
+	--color-accent-foreground: rgb(var(--accent-foreground));
+	--color-destructive: rgb(var(--destructive));
+	--color-destructive-foreground: rgb(var(--destructive-foreground));
+	--color-border: rgb(var(--border));
+	--color-input: rgb(var(--input));
+	--color-ring: rgb(var(--ring));
+
+	/* Primary Colors - Blue (Interaction / CTA) */
+	--color-blue-50: #eff6ff;
+	--color-blue-100: #dbeafe;
+	--color-blue-500: #3e63f6;
+	--color-blue-600: #3e63f6;
+	--color-blue-700: #2d4ed8;
+	--color-blue-hover: #4f6afb;
+
+	/* Purple Gradient Colors (Background accent) */
+	--color-purple-50: #f4e8fb;
+	--color-purple-100: #edebff;
+	--color-purple-200: #e6dfff;
+
+	/* Neutral Grays */
+	--color-gray-50: #f7f8fa;
+	--color-gray-100: #f7f8fa;
+	--color-gray-200: #e3e4e8;
+	--color-gray-300: #d1d5db;
+	--color-gray-400: #9ca3af;
+	--color-gray-500: #6f7287;
+	--color-gray-600: #4b5563;
+	--color-gray-700: #374151;
+	--color-gray-800: #2d2f36;
+	--color-gray-900: #0d0f14;
+
+	/* Success / Danger */
+	--color-success: #0fb46a;
+	--color-danger: #dc3a3a;
+
+	/* Shadows - Extremely soft, almost invisible */
+	--shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.05);
+	--shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+	--shadow-marketing: 0 2px 12px rgba(0, 0, 0, 0.03);
+
+	/* Border Radius */
+	--radius-sm: 6px;
+	--radius-md: 8px;
+	--radius-lg: 10px;
+	--radius-xl: 12px;
+	--radius-full: 9999px;
+
+	/* Spacing Scale (4px base) */
+	--spacing-1: 0.25rem; /* 4px */
+	--spacing-2: 0.5rem; /* 8px */
+	--spacing-3: 0.75rem; /* 12px */
+	--spacing-4: 1rem; /* 16px */
+	--spacing-5: 1.25rem; /* 20px */
+	--spacing-6: 1.5rem; /* 24px */
+	--spacing-8: 2rem; /* 32px */
+	--spacing-10: 2.5rem; /* 40px */
+	--spacing-12: 3rem; /* 48px */
+	--spacing-16: 4rem; /* 64px */
+
+	/* Transitions */
+	--transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+	--transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@layer base {
+	* {
+		border-color: rgb(var(--border));
+	}
+	
+	body {
+		background-color: rgb(var(--background));
+		color: rgb(var(--foreground));
+		@apply antialiased;
+		font-feature-settings: "rlig" 1, "calt" 1;
+	}
+}
+
+/* Custom gradient utilities */
+.gradient-purple {
+	/* Mercury-style, very soft hero wash: mostly white with a hint of lavender at the bottom */
+	background: linear-gradient(
+		to bottom,
+		#fbfcff 0%,
+		#f9fafe 35%,
+		#f2ecff 70%,
+		#f4e8fb 100%
+	);
+}
+
+/* Typography scale */
+.text-hero {
+	@apply text-[56px] sm:text-[72px] font-bold leading-tight;
+}
+
+.text-section-title {
+	@apply text-xl sm:text-2xl font-semibold;
+}
+
+.text-card-title {
+	@apply text-sm sm:text-base font-medium;
+}
+
+/* Custom shadow utilities */
+.shadow-soft {
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-soft-md {
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-marketing {
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
 }
