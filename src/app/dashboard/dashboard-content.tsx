@@ -164,9 +164,9 @@ export function DashboardContent({
 						{steps.map((step, index) => (
 							<div className="flex flex-1 items-center" key={step}>
 								<button
-									type="button"
 									className="flex flex-col items-center gap-2"
 									onClick={() => setCurrentStep(index)}
+									type="button"
 								>
 									<div
 										className={`flex h-8 w-8 items-center justify-center rounded-full border-2 font-semibold text-sm transition-all ${
@@ -338,19 +338,19 @@ export function DashboardContent({
 					{/* Navigation Buttons */}
 					<div className="flex items-center justify-between">
 						<button
-							type="button"
 							className="rounded-lg border border-gray-300 bg-white px-6 py-2.5 font-semibold text-gray-700 text-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
 							disabled={currentStep === 0}
 							onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+							type="button"
 						>
 							Previous
 						</button>
 						<button
-							type="button"
 							className="rounded-lg bg-[#2563eb] px-6 py-2.5 font-semibold text-sm text-white transition hover:bg-[#1d4ed8]"
 							onClick={() =>
 								setCurrentStep(Math.min(steps.length - 1, currentStep + 1))
 							}
+							type="button"
 						>
 							Continue
 						</button>

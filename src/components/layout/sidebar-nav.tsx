@@ -6,9 +6,12 @@ import {
 	FileText,
 	History,
 	LayoutDashboard,
+	Stethoscope,
+	Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -18,47 +21,94 @@ type NavItem = {
 	icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
-const coordinatorNavItems: NavItem[] = [
-	{
-		label: "Dashboard",
-		href: "/dashboard",
-		icon: LayoutDashboard,
-	},
-	{
-		label: "New GL Request",
-		href: "/gl/new",
-		icon: FilePlus2,
-	},
-	{
-		label: "Policy Library",
-		href: "/policies",
-		icon: FileText,
-	},
-	{
-		label: "Insurer Review",
-		href: "/insurer/gls",
-		icon: Building2,
-	},
-	{
-		label: "Activity Log",
-		href: "/activity",
-		icon: History,
-	},
-];
+type SidebarNavProps = {
+	navRole?: "coordinator" | "doctor";
+	heading?: string;
+	items?: NavItem[];
+};
 
-export function SidebarNav() {
+const navByRole: Record<NonNullable<SidebarNavProps["navRole"]>, NavItem[]> = {
+	coordinator: [
+		{
+			label: "Dashboard",
+			href: "/dashboard",
+			icon: LayoutDashboard,
+		},
+		{
+			label: "New GL Request",
+			href: "/gl/new",
+			icon: FilePlus2,
+		},
+		{
+			label: "Policy Library",
+			href: "/policies",
+			icon: FileText,
+		},
+		{
+			label: "Insurer Review",
+			href: "/insurer/gls",
+			icon: Building2,
+		},
+		{
+			label: "Activity Log",
+			href: "/activity",
+			icon: History,
+		},
+	],
+	doctor: [
+		{
+			label: "Patients",
+			href: "/doctor#patients",
+			icon: Users,
+		},
+		{
+			label: "Diagnosis",
+			href: "/doctor#diagnosis",
+			icon: Stethoscope,
+		},
+		{
+			label: "Reports",
+			href: "/doctor#reports",
+			icon: FileText,
+		},
+	],
+};
+
+export function SidebarNav({
+	navRole = "coordinator",
+	heading,
+	items,
+}: SidebarNavProps) {
 	const pathname = usePathname();
+	const [hash, setHash] = useState<string>("");
+
+	useEffect(() => {
+		setHash(window.location.hash);
+		const onHashChange = () => setHash(window.location.hash);
+		window.addEventListener("hashchange", onHashChange);
+		return () => window.removeEventListener("hashchange", onHashChange);
+	}, []);
+
+	const navItems = items ?? navByRole[navRole] ?? [];
+	const headingText =
+		heading ?? (navRole === "doctor" ? "Doctor" : "Coordinator");
 
 	return (
 		<nav className="flex flex-1 flex-col gap-1 text-sm">
 			<p className="mb-2 px-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.2em]">
-				Coordinator
+				{headingText}
 			</p>
 			<ul className="space-y-1">
-				{coordinatorNavItems.map((item) => {
+				{navItems.map((item) => {
+					const [itemPath, itemHash] = item.href.split("#");
+					const isHashLink = item.href.startsWith("#") || Boolean(itemHash);
 					const isActive =
-						pathname === item.href ||
-						(pathname?.startsWith(item.href) && item.href !== "/");
+						(isHashLink && hash === `#${itemHash ?? ""}`) ||
+						pathname === itemPath ||
+						(pathname &&
+							itemPath &&
+							pathname.startsWith(itemPath) &&
+							itemPath !== "/");
 
 					const Icon = item.icon;
 

@@ -10,7 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../../../convex/_generated/api";
 
 export default function PoliciesPage() {
 	const demoPolicies = useQuery(api.policies.listDemoPolicies, {});
