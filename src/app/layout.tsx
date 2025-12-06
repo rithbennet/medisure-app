@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Providers } from "./providers";
 
+import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
+
 export const metadata: Metadata = {
 	title: "Medisure App",
 	description: "Modern healthcare management platform",
@@ -22,7 +24,7 @@ export default function RootLayout({
 	return (
 		<html className={`${inter.variable}`} lang="en">
 			<body>
-				<Providers>{children}</Providers>
+				<ConvexClientProvider>{children}</ConvexClientProvider>
 			</body>
 		</html>
 	);

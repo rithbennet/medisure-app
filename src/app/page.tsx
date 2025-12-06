@@ -33,9 +33,9 @@ const benefits = [
 ];
 
 const demoRoles = [
-	{ label: "Enter as GL Coordinator", variant: "default" as const },
-	{ label: "Enter as Doctor", variant: "secondary" as const },
-	{ label: "Enter as Insurer", variant: "secondary" as const },
+	{ label: "Enter as GL Coordinator", variant: "default" as const, href: "/dashboard" },
+	{ label: "Enter as Doctor", variant: "secondary" as const, href: "/policies" },
+	{ label: "Enter as Insurer", variant: "secondary" as const, href: "/insurer/gls" },
 ];
 
 const howItWorks = [
@@ -74,19 +74,13 @@ export default async function HomePage() {
 						/>
 					</div>
 					<nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-						{user ? (
-							<Link className="transition-colors hover:text-foreground" href="/dashboard">
-								Dashboard
-							</Link>
-						) : (
-							<Link className="transition-colors hover:text-foreground" href="#hero">
-								Dashboard
-							</Link>
-						)}
-						<Link className="transition-colors hover:text-foreground" href="#benefits">
+						<Link className="transition-colors hover:text-foreground" href="/dashboard">
+							Dashboard
+						</Link>
+						<Link className="transition-colors hover:text-foreground" href="/policies">
 							Policies
 						</Link>
-						<Link className="transition-colors hover:text-foreground" href="#demo">
+						<Link className="transition-colors hover:text-foreground" href="/insurer/gls">
 							Insurer Portal
 						</Link>
 					</nav>
@@ -224,11 +218,11 @@ export default async function HomePage() {
 						<div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
 							{demoRoles.map((role) => (
 								<Button
+									asChild
 									className="flex-1"
 									key={role.label}
 									size={"lg" as const}
 									variant={role.variant}
-									asChild
 								>
 									<Link href={user ? "/dashboard" : signUpUrl}>
 										{role.label}
