@@ -1,4 +1,3 @@
-import { getSignUpUrl, withAuth } from "@workos-inc/authkit-nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -33,9 +32,9 @@ const benefits = [
 ];
 
 const demoRoles = [
-	{ label: "Enter as GL Coordinator", variant: "default" as const, href: "/dashboard" },
-	{ label: "Enter as Doctor", variant: "secondary" as const, href: "/policies" },
-	{ label: "Enter as Insurer", variant: "secondary" as const, href: "/insurer/gls" },
+	{ label: "Enter as GL Coordinator", variant: "default" as const },
+	{ label: "Enter as Doctor", variant: "secondary" as const },
+	{ label: "Enter as Insurer", variant: "secondary" as const },
 ];
 
 const howItWorks = [
@@ -55,10 +54,7 @@ const howItWorks = [
 
 const techStack = ["Next.js", "Convex", "OpenAI", "Vector Search"];
 
-export default async function HomePage() {
-	const { user } = await withAuth();
-	const signUpUrl = await getSignUpUrl();
-
+export default function HomePage() {
 	return (
 		<div className="min-h-screen bg-gray-50 text-foreground">
 			<header className="absolute top-0 left-0 right-0 z-50 bg-transparent">
@@ -74,29 +70,19 @@ export default async function HomePage() {
 						/>
 					</div>
 					<nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-						<Link className="transition-colors hover:text-foreground" href="/dashboard">
+						<Link className="transition-colors hover:text-foreground" href="#hero">
 							Dashboard
 						</Link>
-						<Link className="transition-colors hover:text-foreground" href="/policies">
+						<Link className="transition-colors hover:text-foreground" href="#benefits">
 							Policies
 						</Link>
-						<Link className="transition-colors hover:text-foreground" href="/insurer/gls">
+						<Link className="transition-colors hover:text-foreground" href="#demo">
 							Insurer Portal
 						</Link>
 					</nav>
-					{user ? (
-						<Button className="hidden md:inline-flex" size={"sm" as const} asChild>
-							<Link href="/dashboard">
-								Go to Dashboard
-							</Link>
-						</Button>
-					) : (
-						<Button className="hidden md:inline-flex" size={"sm" as const} asChild>
-							<Link href={signUpUrl}>
-								Enter Demo
-							</Link>
-						</Button>
-					)}
+					<Button className="hidden md:inline-flex" size="sm">
+						Enter Demo
+					</Button>
 				</div>
 			</header>
 
@@ -121,23 +107,11 @@ export default async function HomePage() {
 							</p>
 						</div>
 						<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-							{user ? (
-								<Button size={"lg" as const} asChild>
-									<Link href="/dashboard">
-										Go to Dashboard
-									</Link>
-								</Button>
-							) : (
-								<Button size={"lg" as const} asChild>
-									<Link href={signUpUrl}>
-										Cut GL processing from 48 hours to 60 seconds — try it now
-									</Link>
-								</Button>
-							)}
-							<Button size={"lg" as const} variant="secondary" asChild>
-								<Link href="#demo">
-									View Insurer Portal
-								</Link>
+							<Button size="lg">
+								Cut GL processing from 48 hours to 60 seconds — try it now
+							</Button>
+							<Button size="lg" variant="secondary">
+								View Insurer Portal
 							</Button>
 						</div>
 						<p className="text-xs text-muted-foreground">
@@ -218,21 +192,16 @@ export default async function HomePage() {
 						<div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
 							{demoRoles.map((role) => (
 								<Button
-									asChild
 									className="flex-1"
 									key={role.label}
-									size={"lg" as const}
+									size="lg"
 									variant={role.variant}
 								>
-									<Link href={user ? "/dashboard" : signUpUrl}>
-										{role.label}
-									</Link>
+									{role.label}
 								</Button>
 							))}
 						</div>
-						<p className="text-sm text-muted-foreground">
-							{user ? "Welcome back!" : "No login required."}
-						</p>
+						<p className="text-sm text-muted-foreground">No login required.</p>
 					</div>
 				</section>
 

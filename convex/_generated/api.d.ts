@@ -8,31 +8,13 @@
  * @module
  */
 
-import type * as activityLogs from "../activityLogs.js";
-import type * as admin from "../admin.js";
-import type * as glRequests from "../glRequests.js";
-import type * as policies from "../policies.js";
-import type * as seed from "../seed.js";
-import type * as users from "../users.js";
-import type * as utils_activityLog from "../utils/activityLog.js";
-import type * as utils_policyLookup from "../utils/policyLookup.js";
-
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
 
-declare const fullApi: ApiFromModules<{
-  activityLogs: typeof activityLogs;
-  admin: typeof admin;
-  glRequests: typeof glRequests;
-  policies: typeof policies;
-  seed: typeof seed;
-  users: typeof users;
-  "utils/activityLog": typeof utils_activityLog;
-  "utils/policyLookup": typeof utils_policyLookup;
-}>;
+declare const fullApi: ApiFromModules<{}>;
 
 /**
  * A utility for referencing Convex functions in your app's public API.
