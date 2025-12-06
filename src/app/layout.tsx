@@ -2,6 +2,9 @@ import "@/styles/globals.css";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Providers } from "./providers";
+
+import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
 
 export const metadata: Metadata = {
 	title: "Medisure App",
@@ -20,7 +23,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<html className={`${inter.variable}`} lang="en">
-			<body>{children}</body>
+			<body>
+				<ConvexClientProvider>{children}</ConvexClientProvider>
+			</body>
 		</html>
 	);
 }
