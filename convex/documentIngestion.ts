@@ -1,6 +1,6 @@
 /**
  * Document Ingestion Module
- * Handles policy and clinical document ingestion with Gemini-based parsing
+ * Handles policy and clinical document ingestion with Anthropic-based parsing
  */
 
 import { v } from "convex/values";

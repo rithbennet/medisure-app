@@ -310,6 +310,13 @@ export default defineSchema({
 		riskScore: v.optional(v.number()),
 		scoreBucket: v.optional(riskBucket),
 		approvalProbability: v.optional(v.number()),
+		// Calibration data (for Phase 2 model training)
+		actualOutcome: v.optional(v.union(
+			v.literal("approved"),
+			v.literal("denied"),
+		)),
+		outcomeSetAt: v.optional(v.number()), // Timestamp when outcome was recorded
+		outcomeNotes: v.optional(v.string()), // Optional notes about the outcome
 		// Rule evaluation results (CL-16.2)
 		signals: v.optional(v.array(v.object({
 			ruleId: v.string(),
@@ -411,5 +418,46 @@ export default defineSchema({
 		.index("by_policy", ["policyId"])
 		.index("by_action", ["action"])
 		.index("by_timestamp", ["timestamp"]),
+
+	// ============== CALIBRATION DATA (RS-6.2 Phase 2) ==============
+
+	// Calibration dataset for model training
+	// Stores prediction-outcome pairs for calibration
+	calibrationData: defineTable({
+		glRequestId: v.id("glRequests"),
+		// Prediction data (at time of evaluation)
+		predictedProbability: v.number(), // Approval probability predicted by rule engine
+		scoreBucket: riskBucket,
+		signalCount: v.number(),
+		blockerCount: v.number(),
+		warningCount: v.number(),
+		missingItemCount: v.number(),
+		// Actual outcome
+		actualOutcome: v.union(
+			v.literal("approved"),
+			v.literal("denied"),
+		),
+		// Context
+		diagnosis: v.string(),
+		diagnosisCode: v.optional(v.string()),
+		estimatedCost: v.number(),
+		policyId: v.id("policyDocuments"),
+		encounterType: v.optional(v.union(
+			v.literal("inpatient"),
+			v.literal("outpatient"),
+			v.literal("ed"),
+			v.literal("day_surgery"),
+		)),
+		// Metadata
+		evaluatedAt: v.number(), // When prediction was made
+		outcomeSetAt: v.number(), // When actual outcome was recorded
+		outcomeNotes: v.optional(v.string()),
+		createdAt: v.number(),
+	})
+		.index("by_gl_request", ["glRequestId"])
+		.index("by_outcome", ["actualOutcome"])
+		.index("by_policy", ["policyId"])
+		.index("by_evaluated_at", ["evaluatedAt"])
+		.index("by_score_bucket", ["scoreBucket"]),
 });
 

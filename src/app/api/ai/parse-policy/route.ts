@@ -1,11 +1,11 @@
 /**
  * Policy Document Parsing API
- * Uses Gemini to extract clauses and config from policy text
+ * Uses Anthropic to extract clauses and config from policy text
  */
 
 import { generateText } from "ai";
 import { NextResponse } from "next/server";
-import { getDocAnalysisModel } from "@/lib/aiProvider";
+import { getAnthropicModel } from "@/lib/aiProvider";
 import { buildPolicyParsingPrompt } from "@/lib/promptFactory";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../../convex/_generated/api";
@@ -65,11 +65,11 @@ export async function POST(request: Request) {
 			rawText,
 		});
 
-		// Get Gemini model for document analysis
-		const model = getDocAnalysisModel();
+		// Get Anthropic model for document analysis
+		const model = getAnthropicModel();
 		const prompt = buildPolicyParsingPrompt(rawText, insurerName || "Unknown Insurer");
 
-		// Call Gemini for parsing
+		// Call Anthropic for parsing
 		const startTime = Date.now();
 		const { text: resultText } = await generateText({
 			model,
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
 			}
 			parsed = JSON.parse(cleanedText.trim());
 		} catch {
-			console.error("Failed to parse Gemini response:", resultText);
+			console.error("Failed to parse Anthropic response:", resultText);
 			return NextResponse.json(
 				{ error: "Failed to parse AI response", raw: resultText },
 				{ status: 500 },
@@ -160,7 +160,7 @@ export async function POST(request: Request) {
 			metadata: {
 				...parsed.metadata,
 				latencyMs,
-				model: "gemini-2.0-flash",
+				model: env.AI_MODEL_ANTHROPIC ?? "claude-sonnet-4-20250514",
 			},
 		});
 	} catch (error) {

@@ -1,12 +1,13 @@
 /**
  * Clinical Document Parsing API
- * Uses Gemini to extract medical findings from clinical documents
+ * Uses Anthropic to extract medical findings from clinical documents
  */
 
 import { generateText } from "ai";
 import { NextResponse } from "next/server";
-import { getDocAnalysisModel } from "@/lib/aiProvider";
+import { getAnthropicModel } from "@/lib/aiProvider";
 import { buildClinicalParsingPrompt } from "@/lib/promptFactory";
+import { env } from "@/env";
 
 interface ParsedFindings {
 	diagnoses?: string[];
@@ -32,11 +33,11 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// Get Gemini model for document analysis
-		const model = getDocAnalysisModel();
+		// Get Anthropic model for document analysis
+		const model = getAnthropicModel();
 		const prompt = buildClinicalParsingPrompt(rawText, docType || "clinical document");
 
-		// Call Gemini for parsing
+		// Call Anthropic for parsing
 		const startTime = Date.now();
 		const { text: resultText } = await generateText({
 			model,
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
 			}
 			parsed = JSON.parse(cleanedText.trim());
 		} catch {
-			console.error("Failed to parse Gemini response:", resultText);
+			console.error("Failed to parse Anthropic response:", resultText);
 			return NextResponse.json(
 				{ error: "Failed to parse AI response", raw: resultText },
 				{ status: 500 },
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
 			},
 			metadata: {
 				latencyMs,
-				model: "gemini-2.0-flash",
+				model: env.AI_MODEL_ANTHROPIC ?? "claude-sonnet-4-20250514",
 			},
 		});
 	} catch (error) {

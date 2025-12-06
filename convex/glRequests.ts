@@ -350,6 +350,7 @@ export const updateWithAnalysis = internalMutation({
 
 /**
  * Update GL request status (for glRequests table)
+ * Automatically captures calibration data when status changes to approved/denied
  */
 export const updateStatus = mutation({
 	args: {
@@ -360,9 +361,210 @@ export const updateStatus = mutation({
 			v.literal("denied"),
 			v.literal("review"),
 		),
+		outcomeNotes: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
-		await ctx.db.patch(args.glId, { status: args.status });
+		const now = Date.now();
+		
+		// Get current GL request to capture prediction data
+		const glRequest = await ctx.db.get(args.glId);
+		if (!glRequest) {
+			throw new Error("GL request not found");
+		}
+
+		// Update status
+		const updates: Record<string, unknown> = { status: args.status };
+
+		// If status is approved or denied, capture calibration data
+		if (args.status === "approved" || args.status === "denied") {
+			updates.actualOutcome = args.status;
+			updates.outcomeSetAt = now;
+			if (args.outcomeNotes) {
+				updates.outcomeNotes = args.outcomeNotes;
+			}
+
+			// Only create calibration data if we have a prediction
+			if (glRequest.approvalProbability !== undefined && glRequest.rulesEvaluatedAt) {
+				const signals = glRequest.signals || [];
+				const blockers = signals.filter((s: { severity: string }) => s.severity === "Blocker");
+				const warnings = signals.filter((s: { severity: string }) => s.severity === "Warning");
+				const missingItems = glRequest.missingItems || [];
+
+				// Store calibration data point
+				await ctx.db.insert("calibrationData", {
+					glRequestId: args.glId,
+					predictedProbability: glRequest.approvalProbability,
+					scoreBucket: glRequest.scoreBucket || "Low",
+					signalCount: signals.length,
+					blockerCount: blockers.length,
+					warningCount: warnings.length,
+					missingItemCount: missingItems.length,
+					actualOutcome: args.status === "approved" ? "approved" : "denied",
+					diagnosis: glRequest.diagnosis,
+					diagnosisCode: glRequest.diagnosisCode,
+					estimatedCost: glRequest.estimatedCost,
+					policyId: glRequest.policyId,
+					encounterType: glRequest.encounterType,
+					evaluatedAt: glRequest.rulesEvaluatedAt,
+					outcomeSetAt: now,
+					outcomeNotes: args.outcomeNotes,
+					createdAt: now,
+				});
+			}
+		}
+
+		await ctx.db.patch(args.glId, updates);
+	},
+});
+
+// ============== CALIBRATION DATA EXPORT ==============
+
+/**
+ * Get all calibration data points for model training
+ * Returns prediction-outcome pairs with context
+ */
+export const getCalibrationDataset = query({
+	args: {
+		minSamples: v.optional(v.number()), // Minimum number of samples required
+		startDate: v.optional(v.number()), // Filter by outcome date
+		endDate: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		let query = ctx.db.query("calibrationData");
+
+		// Apply date filters if provided
+		if (args.startDate || args.endDate) {
+			// Note: Convex doesn't support range queries directly, so we'll filter in memory
+			// For large datasets, consider adding an index on outcomeSetAt
+			const allData = await query.collect();
+			
+			const filtered = allData.filter((item) => {
+				if (args.startDate && item.outcomeSetAt < args.startDate) return false;
+				if (args.endDate && item.outcomeSetAt > args.endDate) return false;
+				return true;
+			});
+
+			// Check minimum samples
+			if (args.minSamples && filtered.length < args.minSamples) {
+				return {
+					data: [],
+					count: filtered.length,
+					meetsMinimum: false,
+					message: `Only ${filtered.length} samples available, need ${args.minSamples} for training`,
+				};
+			}
+
+			return {
+				data: filtered,
+				count: filtered.length,
+				meetsMinimum: true,
+			};
+		}
+
+		const allData = await query.collect();
+
+		if (args.minSamples && allData.length < args.minSamples) {
+			return {
+				data: [],
+				count: allData.length,
+				meetsMinimum: false,
+				message: `Only ${allData.length} samples available, need ${args.minSamples} for training`,
+			};
+		}
+
+		return {
+			data: allData,
+			count: allData.length,
+			meetsMinimum: true,
+		};
+	},
+});
+
+/**
+ * Get calibration statistics for analysis
+ */
+export const getCalibrationStats = query({
+	args: {},
+	handler: async (ctx) => {
+		const allData = await ctx.db.query("calibrationData").collect();
+
+		if (allData.length === 0) {
+			return {
+				totalSamples: 0,
+				message: "No calibration data available yet",
+			};
+		}
+
+		const approved = allData.filter((d) => d.actualOutcome === "approved").length;
+		const denied = allData.filter((d) => d.actualOutcome === "denied").length;
+		
+		// Calculate calibration metrics
+		const avgPredictedProb = allData.reduce((sum, d) => sum + d.predictedProbability, 0) / allData.length;
+		const actualApprovalRate = approved / allData.length;
+
+		// Group by score bucket
+		const byBucket: Record<string, { count: number; approved: number; avgProb: number }> = {};
+		for (const item of allData) {
+			const bucket = item.scoreBucket;
+			if (!byBucket[bucket]) {
+				byBucket[bucket] = { count: 0, approved: 0, avgProb: 0 };
+			}
+			byBucket[bucket].count++;
+			if (item.actualOutcome === "approved") {
+				byBucket[bucket].approved++;
+			}
+			byBucket[bucket].avgProb += item.predictedProbability;
+		}
+
+		// Calculate averages per bucket
+		for (const bucket of Object.keys(byBucket)) {
+			byBucket[bucket].avgProb /= byBucket[bucket].count;
+		}
+
+		return {
+			totalSamples: allData.length,
+			approved,
+			denied,
+			actualApprovalRate,
+			averagePredictedProbability: avgPredictedProb,
+			calibrationError: Math.abs(avgPredictedProb - actualApprovalRate),
+			byBucket,
+			readyForTraining: allData.length >= 100, // Recommend at least 100 samples
+		};
+	},
+});
+
+/**
+ * Export calibration dataset as CSV-ready format
+ */
+export const exportCalibrationDataset = query({
+	args: {},
+	handler: async (ctx) => {
+		const allData = await ctx.db.query("calibrationData").collect();
+
+		// Format for CSV export or model training
+		return allData.map((item) => ({
+			// Prediction features
+			predicted_probability: item.predictedProbability,
+			score_bucket: item.scoreBucket,
+			signal_count: item.signalCount,
+			blocker_count: item.blockerCount,
+			warning_count: item.warningCount,
+			missing_item_count: item.missingItemCount,
+			// Outcome (target variable)
+			actual_outcome: item.actualOutcome,
+			actual_approved: item.actualOutcome === "approved" ? 1 : 0,
+			// Context features
+			diagnosis: item.diagnosis,
+			diagnosis_code: item.diagnosisCode || "",
+			estimated_cost: item.estimatedCost,
+			encounter_type: item.encounterType || "",
+			// Metadata
+			gl_request_id: item.glRequestId,
+			policy_id: item.policyId,
+			evaluated_at: item.evaluatedAt,
+			outcome_set_at: item.outcomeSetAt,
+		}));
 	},
 });
 
