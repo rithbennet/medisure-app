@@ -4,14 +4,25 @@
  */
 
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
-import { action, internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import {
+	internalMutation,
+	internalQuery,
+	mutation,
+	query,
+} from "./_generated/server";
 
 // ============== TYPES ==============
 
 export interface ParsedClause {
 	clauseId: string;
-	type: "waiting_period" | "exclusion_general" | "exclusion_specific" | "sublimit" | "coverage" | "doc_requirement" | "pec_definition";
+	type:
+		| "waiting_period"
+		| "exclusion_general"
+		| "exclusion_specific"
+		| "sublimit"
+		| "coverage"
+		| "doc_requirement"
+		| "pec_definition";
 	tags: string[];
 	text: string;
 	pageRef?: string;
@@ -115,24 +126,26 @@ export const storePolicyRawText = mutation({
 export const storeParsedClauses = internalMutation({
 	args: {
 		policyId: v.id("policyDocuments"),
-		clauses: v.array(v.object({
-			clauseId: v.string(),
-			type: v.union(
-				v.literal("waiting_period"),
-				v.literal("exclusion_general"),
-				v.literal("exclusion_specific"),
-				v.literal("sublimit"),
-				v.literal("coverage"),
-				v.literal("doc_requirement"),
-				v.literal("pec_definition"),
-			),
-			tags: v.array(v.string()),
-			text: v.string(),
-			pageRef: v.optional(v.string()),
-			waitingPeriodDays: v.optional(v.number()),
-			sublimitAmount: v.optional(v.number()),
-			sublimitCategory: v.optional(v.string()),
-		})),
+		clauses: v.array(
+			v.object({
+				clauseId: v.string(),
+				type: v.union(
+					v.literal("waiting_period"),
+					v.literal("exclusion_general"),
+					v.literal("exclusion_specific"),
+					v.literal("sublimit"),
+					v.literal("coverage"),
+					v.literal("doc_requirement"),
+					v.literal("pec_definition"),
+				),
+				tags: v.array(v.string()),
+				text: v.string(),
+				pageRef: v.optional(v.string()),
+				waitingPeriodDays: v.optional(v.number()),
+				sublimitAmount: v.optional(v.number()),
+				sublimitCategory: v.optional(v.string()),
+			}),
+		),
 	},
 	handler: async (ctx, args) => {
 		const insertedIds = [];
@@ -157,29 +170,45 @@ export const storePayerConfig = internalMutation({
 		payerName: v.string(),
 		planCode: v.string(),
 		config: v.object({
-			waitingPeriods: v.optional(v.array(v.object({
-				conditionTag: v.string(),
-				days: v.number(),
-				clauseId: v.optional(v.string()),
-			}))),
-			exclusionsGeneral: v.optional(v.array(v.object({
-				tag: v.string(),
-				description: v.string(),
-				clauseId: v.optional(v.string()),
-			}))),
-			exclusionsSpecific: v.optional(v.array(v.object({
-				code: v.string(),
-				codeType: v.union(v.literal("icd10"), v.literal("procedure")),
-				description: v.string(),
-				clauseId: v.optional(v.string()),
-			}))),
-			sublimits: v.optional(v.array(v.object({
-				category: v.string(),
-				amount: v.number(),
-				currency: v.string(),
-				period: v.optional(v.string()),
-				clauseId: v.optional(v.string()),
-			}))),
+			waitingPeriods: v.optional(
+				v.array(
+					v.object({
+						conditionTag: v.string(),
+						days: v.number(),
+						clauseId: v.optional(v.string()),
+					}),
+				),
+			),
+			exclusionsGeneral: v.optional(
+				v.array(
+					v.object({
+						tag: v.string(),
+						description: v.string(),
+						clauseId: v.optional(v.string()),
+					}),
+				),
+			),
+			exclusionsSpecific: v.optional(
+				v.array(
+					v.object({
+						code: v.string(),
+						codeType: v.union(v.literal("icd10"), v.literal("procedure")),
+						description: v.string(),
+						clauseId: v.optional(v.string()),
+					}),
+				),
+			),
+			sublimits: v.optional(
+				v.array(
+					v.object({
+						category: v.string(),
+						amount: v.number(),
+						currency: v.string(),
+						period: v.optional(v.string()),
+						clauseId: v.optional(v.string()),
+					}),
+				),
+			),
 			annualMax: v.optional(v.number()),
 			lifetimeMax: v.optional(v.number()),
 			currency: v.optional(v.string()),
@@ -220,12 +249,14 @@ export const storePayerConfig = internalMutation({
 export const markPolicyIngestionComplete = internalMutation({
 	args: {
 		policyId: v.id("policyDocuments"),
-		metadata: v.optional(v.object({
-			totalPages: v.optional(v.number()),
-			extractedDate: v.optional(v.string()),
-			documentType: v.optional(v.string()),
-			version: v.optional(v.string()),
-		})),
+		metadata: v.optional(
+			v.object({
+				totalPages: v.optional(v.number()),
+				extractedDate: v.optional(v.string()),
+				documentType: v.optional(v.string()),
+				version: v.optional(v.string()),
+			}),
+		),
 	},
 	handler: async (ctx, args) => {
 		await ctx.db.patch(args.policyId, {
@@ -319,4 +350,3 @@ export const getClinicalDocForParsing = internalQuery({
 		return await ctx.db.get(args.docId);
 	},
 });
-

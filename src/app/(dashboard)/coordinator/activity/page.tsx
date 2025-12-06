@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
 import { useQuery } from "convex/react";
+import { useMemo } from "react";
 
 import {
 	Card,
@@ -42,7 +42,7 @@ function ActivityContent({
 }>) {
 	if (activity === undefined) {
 		return (
-			<p className="text-sm text-muted-foreground">
+			<p className="text-muted-foreground text-sm">
 				Loading activity log&hellip;
 			</p>
 		);
@@ -50,7 +50,7 @@ function ActivityContent({
 
 	if (items.length === 0) {
 		return (
-			<p className="text-sm text-muted-foreground">
+			<p className="text-muted-foreground text-sm">
 				No activity yet. Create a GL and simulate an insurer outcome to see
 				events appear here.
 			</p>
@@ -58,17 +58,17 @@ function ActivityContent({
 	}
 
 	return (
-		<ol className="relative border-l border-gray-200 pl-4">
+		<ol className="relative border-gray-200 border-l pl-4">
 			{items.map((event: TimelineItem) => (
 				<li className="mb-6 ml-2 last:mb-0" key={event.id}>
-					<div className="absolute -left-[9px] mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" />
-					<p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+					<div className="-left-[9px] absolute mt-1 h-2.5 w-2.5 rounded-full bg-blue-500" />
+					<p className="text-muted-foreground text-xs uppercase tracking-[0.2em]">
 						{event.time}
 					</p>
-					<p className="mt-1 text-sm font-semibold text-gray-900">
+					<p className="mt-1 font-semibold text-gray-900 text-sm">
 						{event.title}
 					</p>
-					<p className="mt-1 text-xs text-muted-foreground">{event.body}</p>
+					<p className="mt-1 text-muted-foreground text-xs">{event.body}</p>
 				</li>
 			))}
 		</ol>
@@ -76,9 +76,7 @@ function ActivityContent({
 }
 
 export default function ActivityPage() {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const activityApi = api as any;
-	const activity = useQuery(activityApi.activityLogs?.listActivity, {}) as
+	const activity = useQuery(api.activityLogs.listActivity, {}) as
 		| ActivityLog[]
 		| undefined;
 
@@ -101,13 +99,13 @@ export default function ActivityPage() {
 			<section>
 				<Card className="bg-white shadow-soft-md">
 					<CardHeader>
-						<p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+						<p className="text-muted-foreground text-xs uppercase tracking-[0.3em]">
 							Activity
 						</p>
-						<CardTitle className="text-section-title text-gray-900">
+						<CardTitle className="text-gray-900 text-section-title">
 							Activity Log
 						</CardTitle>
-						<CardDescription className="text-sm text-muted-foreground">
+						<CardDescription className="text-muted-foreground text-sm">
 							A narrative timeline of key demo events — perfect for judges and
 							stakeholders following along.
 						</CardDescription>
@@ -134,5 +132,3 @@ export default function ActivityPage() {
 		</div>
 	);
 }
-
-

@@ -5,4 +5,3 @@ export async function GET() {
 	// and clears the local cookies
 	await signOut({ returnTo: "/" });
 }
-

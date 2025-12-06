@@ -1,9 +1,17 @@
-import { mutation, query, type MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { internalMutation, internalQuery } from "./_generated/server";
-
-import { lookupPolicyForUser, type PolicyMetadata } from "./utils/policyLookup";
+import type { Doc } from "./_generated/dataModel";
+import {
+	internalMutation,
+	internalQuery,
+	type MutationCtx,
+	mutation,
+	query,
+} from "./_generated/server";
 import { logActivity } from "./utils/activityLog";
+import { lookupPolicyForUser, type PolicyMetadata } from "./utils/policyLookup";
+
+// Demo doctor ID for hackathon - auto-assign to this doctor
+const DEMO_DOCTOR_ID = "demo_doctor_001";
 
 type CreateGLArgs = {
 	patientName: string;
@@ -24,6 +32,10 @@ export type GLRequestWithPolicy = {
 	riskBand?: string;
 	riskExplanation?: string;
 	policy?: PolicyMetadata | null;
+	// Doctor workflow fields
+	assignedDoctorId?: string | null;
+	doctorStatus?: string | null;
+	hasDoctorReport?: boolean;
 };
 
 // ============== HEAD VERSION FUNCTIONS ==============
@@ -35,7 +47,10 @@ export const createGLRequest = mutation({
 		diagnosis: v.string(),
 		estimatedCost: v.optional(v.number()),
 	},
-	async handler(ctx: MutationCtx, args: CreateGLArgs): Promise<GLRequestWithPolicy> {
+	async handler(
+		ctx: MutationCtx,
+		args: CreateGLArgs,
+	): Promise<GLRequestWithPolicy> {
 		const now = Date.now();
 		const matchedPolicy = lookupPolicyForUser(args.insurerName);
 
@@ -48,6 +63,9 @@ export const createGLRequest = mutation({
 			policyId: matchedPolicy?.id,
 			riskBand: undefined,
 			riskExplanation: undefined,
+			// Auto-assign to demo doctor for hackathon
+			assignedDoctorId: DEMO_DOCTOR_ID,
+			doctorStatus: "PENDING",
 			createdAt: now,
 			updatedAt: now,
 		});
@@ -56,8 +74,8 @@ export const createGLRequest = mutation({
 			type: "gl_created",
 			glId: glId as unknown as string,
 			message: matchedPolicy
-				? `Auto-matched policy: ${matchedPolicy.productName} (${matchedPolicy.insurerName})`
-				: `No indexed policy found for insurer ${args.insurerName}.`,
+				? `Auto-matched policy: ${matchedPolicy.productName} (${matchedPolicy.insurerName}). Assigned to demo doctor.`
+				: `No indexed policy found for insurer ${args.insurerName}. Assigned to demo doctor.`,
 		});
 
 		return {
@@ -72,6 +90,9 @@ export const createGLRequest = mutation({
 			riskBand: undefined,
 			riskExplanation: undefined,
 			policy: matchedPolicy,
+			assignedDoctorId: DEMO_DOCTOR_ID,
+			doctorStatus: "PENDING",
+			hasDoctorReport: false,
 		};
 	},
 });
@@ -83,7 +104,7 @@ export const getGLRequests = query({
 
 		return gls
 			.sort((a, b) => (b.createdAt as number) - (a.createdAt as number))
-			.map((gl: any) => {
+			.map((gl: Doc<"gl_requests">) => {
 				const matchedPolicy = lookupPolicyForUser(gl.insurerName as string);
 
 				return {
@@ -98,6 +119,10 @@ export const getGLRequests = query({
 					riskBand: gl.riskBand as string | undefined,
 					riskExplanation: gl.riskExplanation as string | undefined,
 					policy: matchedPolicy,
+					// Doctor workflow fields
+					assignedDoctorId: gl.assignedDoctorId as string | null | undefined,
+					doctorStatus: gl.doctorStatus as string | null | undefined,
+					hasDoctorReport: gl.hasDoctorReport as boolean | undefined,
 				};
 			});
 	},
@@ -128,6 +153,10 @@ export const getGLById = query({
 			riskBand: gl.riskBand,
 			riskExplanation: gl.riskExplanation,
 			policy: matchedPolicy,
+			// Doctor workflow fields
+			assignedDoctorId: gl.assignedDoctorId,
+			doctorStatus: gl.doctorStatus,
+			hasDoctorReport: gl.hasDoctorReport,
 		};
 	},
 });
@@ -283,4 +312,3 @@ export const updateStatus = mutation({
 		await ctx.db.patch(args.glId, { status: args.status });
 	},
 });
-

@@ -10,6 +10,7 @@
 
 import type * as activityLogs from "../activityLogs.js";
 import type * as admin from "../admin.js";
+import type * as doctor from "../doctor.js";
 import type * as documentIngestion from "../documentIngestion.js";
 import type * as glRequests from "../glRequests.js";
 import type * as policies from "../policies.js";
@@ -28,6 +29,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   activityLogs: typeof activityLogs;
   admin: typeof admin;
+  doctor: typeof doctor;
   documentIngestion: typeof documentIngestion;
   glRequests: typeof glRequests;
   policies: typeof policies;

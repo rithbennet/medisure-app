@@ -14,13 +14,13 @@ export default function NewGLPage() {
 			<section>
 				<Card className="bg-white shadow-soft-md">
 					<CardHeader>
-						<p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+						<p className="text-muted-foreground text-xs uppercase tracking-[0.3em]">
 							New Request
 						</p>
-						<CardTitle className="text-section-title text-gray-900">
+						<CardTitle className="text-gray-900 text-section-title">
 							New Guarantee Letter
 						</CardTitle>
-						<CardDescription className="text-sm text-muted-foreground">
+						<CardDescription className="text-muted-foreground text-sm">
 							Capture patient, policy, diagnosis, and cost details. The AI
 							engine will analyse risk and suggest justification language.
 						</CardDescription>
@@ -50,12 +50,11 @@ export default function NewGLPage() {
 							Risk analysis
 						</CardTitle>
 						<CardDescription>
-							AI-predicted risk band and explanation appear here after
-							analysis.
+							AI-predicted risk band and explanation appear here after analysis.
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="space-y-3 text-sm text-muted-foreground">
+						<div className="space-y-3 text-muted-foreground text-sm">
 							<p>
 								The risk panel will show a coloured band (Green / Amber / Red),
 								short reason, and links to policy clauses.
@@ -71,5 +70,3 @@ export default function NewGLPage() {
 		</div>
 	);
 }
-
-

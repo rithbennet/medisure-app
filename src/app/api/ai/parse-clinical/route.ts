@@ -34,7 +34,10 @@ export async function POST(request: Request) {
 
 		// Get Gemini model for document analysis
 		const model = getDocAnalysisModel();
-		const prompt = buildClinicalParsingPrompt(rawText, docType || "clinical document");
+		const prompt = buildClinicalParsingPrompt(
+			rawText,
+			docType || "clinical document",
+		);
 
 		// Call Gemini for parsing
 		const startTime = Date.now();
@@ -93,4 +96,3 @@ export async function POST(request: Request) {
 		);
 	}
 }
-

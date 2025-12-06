@@ -1,3 +1,4 @@
+import type { Doc } from "./_generated/dataModel";
 import { query } from "./_generated/server";
 
 export type ActivityLog = {
@@ -15,7 +16,7 @@ export const listActivity = query({
 
 		return logs
 			.sort((a, b) => (b.createdAt as number) - (a.createdAt as number))
-			.map((log: any) => ({
+			.map((log: Doc<"activity_logs">) => ({
 				_id: log._id as string,
 				type: log.type as string,
 				message: log.message as string,
@@ -24,5 +25,3 @@ export const listActivity = query({
 			}));
 	},
 });
-
-

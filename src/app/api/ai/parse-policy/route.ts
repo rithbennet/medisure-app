@@ -4,19 +4,26 @@
  */
 
 import { generateText } from "ai";
+import { ConvexHttpClient } from "convex/browser";
 import { NextResponse } from "next/server";
+import { env } from "@/env";
 import { getDocAnalysisModel } from "@/lib/aiProvider";
 import { buildPolicyParsingPrompt } from "@/lib/promptFactory";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../../convex/_generated/api";
 import type { Id } from "../../../../../convex/_generated/dataModel";
-import { env } from "@/env";
 
 const convex = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL);
 
 interface ParsedClause {
 	clause_id: string;
-	type: "waiting_period" | "exclusion_general" | "exclusion_specific" | "sublimit" | "coverage" | "doc_requirement" | "pec_definition";
+	type:
+		| "waiting_period"
+		| "exclusion_general"
+		| "exclusion_specific"
+		| "sublimit"
+		| "coverage"
+		| "doc_requirement"
+		| "pec_definition";
 	tags: string[];
 	text: string;
 	page_ref?: string;
@@ -67,7 +74,10 @@ export async function POST(request: Request) {
 
 		// Get Gemini model for document analysis
 		const model = getDocAnalysisModel();
-		const prompt = buildPolicyParsingPrompt(rawText, insurerName || "Unknown Insurer");
+		const prompt = buildPolicyParsingPrompt(
+			rawText,
+			insurerName || "Unknown Insurer",
+		);
 
 		// Call Gemini for parsing
 		const startTime = Date.now();
@@ -103,7 +113,7 @@ export async function POST(request: Request) {
 
 		// Store parsed clauses in Convex
 		if (parsed.clauses && parsed.clauses.length > 0) {
-			const clausesForDb = parsed.clauses.map((c) => ({
+			const _clausesForDb = parsed.clauses.map((c) => ({
 				clauseId: c.clause_id,
 				type: c.type,
 				tags: c.tags || [],
@@ -144,4 +154,3 @@ export async function POST(request: Request) {
 		);
 	}
 }
-

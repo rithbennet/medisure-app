@@ -7,7 +7,6 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { action, internalMutation, internalQuery } from "./_generated/server";
-import type { Doc, Id } from "./_generated/dataModel";
 
 // ============== TYPE DEFINITIONS ==============
 
@@ -56,14 +55,36 @@ export interface CaseIntake {
 }
 
 export interface PayerConfig {
-	waitingPeriods?: Array<{ conditionTag: string; days: number; clauseId?: string }>;
-	exclusionsGeneral?: Array<{ tag: string; description: string; clauseId?: string }>;
-	exclusionsSpecific?: Array<{ code: string; codeType: string; description: string; clauseId?: string }>;
-	sublimits?: Array<{ category: string; amount: number; currency: string; clauseId?: string }>;
+	waitingPeriods?: Array<{
+		conditionTag: string;
+		days: number;
+		clauseId?: string;
+	}>;
+	exclusionsGeneral?: Array<{
+		tag: string;
+		description: string;
+		clauseId?: string;
+	}>;
+	exclusionsSpecific?: Array<{
+		code: string;
+		codeType: string;
+		description: string;
+		clauseId?: string;
+	}>;
+	sublimits?: Array<{
+		category: string;
+		amount: number;
+		currency: string;
+		clauseId?: string;
+	}>;
 	annualMax?: number;
 	lifetimeMax?: number;
 	currency?: string;
-	requiredDocs?: Array<{ encounterType: string; docTypes: string[]; conditionTags?: string[] }>;
+	requiredDocs?: Array<{
+		encounterType: string;
+		docTypes: string[];
+		conditionTags?: string[];
+	}>;
 	electiveLeadTimeDays?: number;
 	edNotificationHours?: number;
 	panelRequired?: boolean;
@@ -193,7 +214,10 @@ function checkFieldValidations(intake: CaseIntake): Signal[] {
 
 	// Estimate breakdown sum validation (if provided)
 	if (intake.estimateBreakdown && intake.estimateBreakdown.length > 0) {
-		const breakdownSum = intake.estimateBreakdown.reduce((sum, item) => sum + item.amount, 0);
+		const breakdownSum = intake.estimateBreakdown.reduce(
+			(sum, item) => sum + item.amount,
+			0,
+		);
 		const diff = Math.abs(breakdownSum - intake.estimatedCost);
 		const diffPercent = (diff / intake.estimatedCost) * 100;
 
@@ -202,14 +226,22 @@ function checkFieldValidations(intake: CaseIntake): Signal[] {
 				ruleId: "I-4.2",
 				severity: "Blocker",
 				message: `Estimate breakdown sum (${breakdownSum}) differs from total (${intake.estimatedCost}) by ${diffPercent.toFixed(1)}%`,
-				evidence: { breakdownSum, totalEstimate: intake.estimatedCost, diffPercent },
+				evidence: {
+					breakdownSum,
+					totalEstimate: intake.estimatedCost,
+					diffPercent,
+				},
 			});
 		} else if (diffPercent > 0) {
 			signals.push({
 				ruleId: "I-4.2",
 				severity: "Warning",
 				message: `Estimate breakdown sum (${breakdownSum}) differs slightly from total (${intake.estimatedCost})`,
-				evidence: { breakdownSum, totalEstimate: intake.estimatedCost, diffPercent },
+				evidence: {
+					breakdownSum,
+					totalEstimate: intake.estimatedCost,
+					diffPercent,
+				},
 			});
 		}
 	}
@@ -230,7 +262,9 @@ function checkAttachmentRequirements(
 	const attachmentTypes = new Set(intake.attachments?.map((a) => a.type) || []);
 
 	// Doctor report required for surgical/day_surgery/inpatient
-	const requiresDoctorReport = ["inpatient", "day_surgery"].includes(intake.encounterType || "");
+	const requiresDoctorReport = ["inpatient", "day_surgery"].includes(
+		intake.encounterType || "",
+	);
 	if (requiresDoctorReport && !attachmentTypes.has("doctor_report")) {
 		missing.push({
 			type: "attachment",
@@ -248,7 +282,10 @@ function checkAttachmentRequirements(
 
 	// Itemized estimate if cost exceeds threshold
 	const itemizedThreshold = 10000; // Default threshold
-	if (intake.estimatedCost >= itemizedThreshold && !attachmentTypes.has("itemized_estimate")) {
+	if (
+		intake.estimatedCost >= itemizedThreshold &&
+		!attachmentTypes.has("itemized_estimate")
+	) {
 		missing.push({
 			type: "attachment",
 			key: "itemized_estimate",
@@ -258,7 +295,10 @@ function checkAttachmentRequirements(
 			ruleId: "I-4.3",
 			severity: "Warning",
 			message: `Itemized estimate recommended for costs ≥ ${itemizedThreshold}`,
-			evidence: { estimatedCost: intake.estimatedCost, threshold: itemizedThreshold },
+			evidence: {
+				estimatedCost: intake.estimatedCost,
+				threshold: itemizedThreshold,
+			},
 			suggestedAction: "Upload itemized estimate",
 		});
 	}
@@ -291,7 +331,10 @@ function checkPolicyEffectiveWindow(intake: CaseIntake): Signal[] {
 	const signals: Signal[] = [];
 
 	if (intake.symptomStartDate && intake.policyStartDate) {
-		const daysAfterPolicy = daysBetween(intake.symptomStartDate, intake.policyStartDate);
+		const daysAfterPolicy = daysBetween(
+			intake.symptomStartDate,
+			intake.policyStartDate,
+		);
 
 		if (daysAfterPolicy < 0) {
 			signals.push({
@@ -310,7 +353,10 @@ function checkPolicyEffectiveWindow(intake: CaseIntake): Signal[] {
 
 	// Elective planned date check
 	if (intake.plannedDate && intake.policyStartDate) {
-		const plannedDaysAfterPolicy = daysBetween(intake.plannedDate, intake.policyStartDate);
+		const plannedDaysAfterPolicy = daysBetween(
+			intake.plannedDate,
+			intake.policyStartDate,
+		);
 		if (plannedDaysAfterPolicy < 0) {
 			signals.push({
 				ruleId: "EL-5.1",
@@ -338,11 +384,16 @@ function checkWaitingPeriod(
 	const signals: Signal[] = [];
 
 	// Find applicable waiting periods
-	const waitingPeriodClauses = clauses.filter((c) => c.type === "waiting_period");
+	const waitingPeriodClauses = clauses.filter(
+		(c) => c.type === "waiting_period",
+	);
 
 	// Default waiting period check (30 days for most conditions)
 	const defaultWaitingDays = 30;
-	const daysAfterPolicy = daysBetween(intake.symptomStartDate, intake.policyStartDate);
+	const daysAfterPolicy = daysBetween(
+		intake.symptomStartDate,
+		intake.policyStartDate,
+	);
 
 	// Check if any waiting period clause applies
 	for (const clause of waitingPeriodClauses) {
@@ -374,7 +425,11 @@ function checkWaitingPeriod(
 					severity: "Warning",
 					message: `Waiting period for ${wp.conditionTag}: ${wp.days} days required, ${daysAfterPolicy} days elapsed`,
 					clauseId: wp.clauseId,
-					evidence: { conditionTag: wp.conditionTag, required: wp.days, actual: daysAfterPolicy },
+					evidence: {
+						conditionTag: wp.conditionTag,
+						required: wp.days,
+						actual: daysAfterPolicy,
+					},
 				});
 			}
 		}
@@ -394,7 +449,10 @@ function checkPreExistingCondition(
 	const signals: Signal[] = [];
 
 	// Check for PEC indicators in clinical findings
-	if (clinicalFindings?.pecIndicators && clinicalFindings.pecIndicators.length > 0) {
+	if (
+		clinicalFindings?.pecIndicators &&
+		clinicalFindings.pecIndicators.length > 0
+	) {
 		signals.push({
 			ruleId: "EL-5.3",
 			severity: "Warning",
@@ -405,7 +463,10 @@ function checkPreExistingCondition(
 	}
 
 	// Check if symptoms started before policy
-	const daysAfterPolicy = daysBetween(intake.symptomStartDate, intake.policyStartDate);
+	const daysAfterPolicy = daysBetween(
+		intake.symptomStartDate,
+		intake.policyStartDate,
+	);
 	if (daysAfterPolicy < 0) {
 		// Find PEC definition clause
 		const pecClause = clauses.find((c) => c.type === "pec_definition");
@@ -420,7 +481,8 @@ function checkPreExistingCondition(
 				policyStartDate: intake.policyStartDate,
 				daysBeforePolicy: Math.abs(daysAfterPolicy),
 			},
-			suggestedAction: "Consider self-pay or exception request with medical justification",
+			suggestedAction:
+				"Consider self-pay or exception request with medical justification",
 		});
 	}
 
@@ -525,6 +587,85 @@ function checkPanelStatus(intake: CaseIntake, config?: PayerConfig): Signal[] {
 }
 
 /**
+ * Check if a clause matches diagnosis tags
+ */
+function checkClauseTagMatch(
+	clause: PolicyClause,
+	diagnosisTags: string[],
+): boolean {
+	return clause.tags.some((tag) =>
+		diagnosisTags.some((dt) => dt.includes(tag.toLowerCase())),
+	);
+}
+
+/**
+ * Check clause-based exclusions
+ */
+function checkClauseExclusions(
+	intake: CaseIntake,
+	clauses: PolicyClause[],
+): Signal[] {
+	const signals: Signal[] = [];
+	const exclusionClauses = clauses.filter(
+		(c) => c.type === "exclusion_general" || c.type === "exclusion_specific",
+	);
+	const diagnosisTags = intake.diagnosis.toLowerCase().split(/\s+/);
+
+	for (const clause of exclusionClauses) {
+		if (checkClauseTagMatch(clause, diagnosisTags)) {
+			signals.push({
+				ruleId: clause.type === "exclusion_general" ? "EL-5.4" : "EL-5.5",
+				severity: "Blocker",
+				message: `Potential exclusion match: ${clause.text.substring(0, 100)}...`,
+				clauseId: clause.clauseId,
+				clauseText: clause.text,
+				evidence: {
+					matchedTag: clause.tags.find((tag) =>
+						diagnosisTags.some((dt) => dt.includes(tag.toLowerCase())),
+					),
+					diagnosis: intake.diagnosis,
+					pageRef: clause.pageRef,
+				},
+				suggestedAction: "Review exclusion clause applicability",
+			});
+		}
+	}
+
+	return signals;
+}
+
+/**
+ * Check config-based specific exclusions by ICD code
+ */
+function checkConfigSpecificExclusions(
+	intake: CaseIntake,
+	config?: PayerConfig,
+): Signal[] {
+	const signals: Signal[] = [];
+
+	if (!config?.exclusionsSpecific || !intake.diagnosisCode) {
+		return signals;
+	}
+
+	for (const excl of config.exclusionsSpecific) {
+		if (
+			excl.codeType === "icd10" &&
+			intake.diagnosisCode.startsWith(excl.code)
+		) {
+			signals.push({
+				ruleId: "EL-5.5",
+				severity: "Blocker",
+				message: `Specific exclusion: ${excl.description}`,
+				clauseId: excl.clauseId,
+				evidence: { code: intake.diagnosisCode, exclusionCode: excl.code },
+			});
+		}
+	}
+
+	return signals;
+}
+
+/**
  * EL-5.4/5.5 Exclusions Check
  */
 function checkExclusions(
@@ -532,48 +673,10 @@ function checkExclusions(
 	clauses: PolicyClause[],
 	config?: PayerConfig,
 ): Signal[] {
-	const signals: Signal[] = [];
-
-	// Check general exclusions
-	const exclusionClauses = clauses.filter(
-		(c) => c.type === "exclusion_general" || c.type === "exclusion_specific",
-	);
-
-	for (const clause of exclusionClauses) {
-		// Simple tag matching - in production would use more sophisticated matching
-		const diagnosisTags = intake.diagnosis.toLowerCase().split(/\s+/);
-
-		for (const tag of clause.tags) {
-			if (diagnosisTags.some((dt) => dt.includes(tag.toLowerCase()))) {
-				signals.push({
-					ruleId: clause.type === "exclusion_general" ? "EL-5.4" : "EL-5.5",
-					severity: "Blocker",
-					message: `Potential exclusion match: ${clause.text.substring(0, 100)}...`,
-					clauseId: clause.clauseId,
-					clauseText: clause.text,
-					evidence: { matchedTag: tag, diagnosis: intake.diagnosis, pageRef: clause.pageRef },
-					suggestedAction: "Review exclusion clause applicability",
-				});
-			}
-		}
-	}
-
-	// Check config-based specific exclusions by ICD code
-	if (config?.exclusionsSpecific && intake.diagnosisCode) {
-		for (const excl of config.exclusionsSpecific) {
-			if (excl.codeType === "icd10" && intake.diagnosisCode.startsWith(excl.code)) {
-				signals.push({
-					ruleId: "EL-5.5",
-					severity: "Blocker",
-					message: `Specific exclusion: ${excl.description}`,
-					clauseId: excl.clauseId,
-					evidence: { code: intake.diagnosisCode, exclusionCode: excl.code },
-				});
-			}
-		}
-	}
-
-	return signals;
+	return [
+		...checkClauseExclusions(intake, clauses),
+		...checkConfigSpecificExclusions(intake, config),
+	];
 }
 
 // ============== MAIN RULE ENGINE FUNCTION ==============
@@ -588,31 +691,44 @@ export function evaluateRules(
 	config?: PayerConfig,
 	clinicalFindings?: ClinicalFindings,
 ): RuleEngineResult {
-	const allSignals: Signal[] = [];
-	const allMissing: MissingItem[] = [];
-
 	// I-4.* Intake Rules
-	allSignals.push(...checkRequiredFields(intake));
-	allSignals.push(...checkFieldValidations(intake));
+	const intakeSignals = [
+		...checkRequiredFields(intake),
+		...checkFieldValidations(intake),
+	];
 
 	const attachmentResult = checkAttachmentRequirements(intake, config);
-	allSignals.push(...attachmentResult.signals);
-	allMissing.push(...attachmentResult.missing);
 
 	// EL-5.* Eligibility Rules
-	allSignals.push(...checkPolicyEffectiveWindow(intake));
-	allSignals.push(...checkWaitingPeriod(intake, clauses, config));
-	allSignals.push(...checkPreExistingCondition(intake, clauses, clinicalFindings));
-	allSignals.push(...checkSublimits(intake, clauses, config));
-	allSignals.push(...checkMaximums(intake, config));
-	allSignals.push(...checkPanelStatus(intake, config));
-	allSignals.push(...checkExclusions(intake, clauses, config));
+	const eligibilitySignals = [
+		...checkPolicyEffectiveWindow(intake),
+		...checkWaitingPeriod(intake, clauses, config),
+		...checkPreExistingCondition(intake, clauses, clinicalFindings),
+		...checkSublimits(intake, clauses, config),
+		...checkMaximums(intake, config),
+		...checkPanelStatus(intake, config),
+		...checkExclusions(intake, clauses, config),
+	];
+
+	const allSignals = [
+		...intakeSignals,
+		...attachmentResult.signals,
+		...eligibilitySignals,
+	];
+	const allMissing = [...attachmentResult.missing];
 
 	// RS-6.* Risk Scoring
-	const { scoreBucket, approvalProbability } = calculateRiskScore(allSignals, allMissing);
+	const { scoreBucket, approvalProbability } = calculateRiskScore(
+		allSignals,
+		allMissing,
+	);
 
 	// Generate suggested actions
-	const suggestedActions = generateSuggestedActions(allSignals, allMissing, scoreBucket);
+	const suggestedActions = generateSuggestedActions(
+		allSignals,
+		allMissing,
+		scoreBucket,
+	);
 
 	return {
 		signals: allSignals,
@@ -645,7 +761,10 @@ function calculateRiskScore(
 			probability -= 0.2; // PEC Warning
 		} else if (signal.ruleId === "EL-5.2") {
 			probability -= 0.15; // Waiting period
-		} else if (signal.ruleId.startsWith("EL-5.4") || signal.ruleId.startsWith("EL-5.5")) {
+		} else if (
+			signal.ruleId.startsWith("EL-5.4") ||
+			signal.ruleId.startsWith("EL-5.5")
+		) {
 			probability -= 0.1; // Exclusion warnings
 		} else {
 			probability -= 0.05; // Other warnings
@@ -662,13 +781,19 @@ function calculateRiskScore(
 	let scoreBucket: RiskBucket;
 	if (blockers.length > 0) {
 		scoreBucket = "High";
-	} else if (warnings.length >= 2 || signals.some((s) => s.ruleId === "EL-5.6")) {
+	} else if (
+		warnings.length >= 2 ||
+		signals.some((s) => s.ruleId === "EL-5.6")
+	) {
 		scoreBucket = "Medium";
 	} else {
 		scoreBucket = "Low";
 	}
 
-	return { scoreBucket, approvalProbability: Math.round(probability * 100) / 100 };
+	return {
+		scoreBucket,
+		approvalProbability: Math.round(probability * 100) / 100,
+	};
 }
 
 /**
@@ -690,7 +815,7 @@ function generateSuggestedActions(
 
 	// Add actions for missing items
 	for (const item of missingItems) {
-		const action = `Upload ${item.key.replace(/_/g, " ")}`;
+		const action = `Upload ${item.key.replaceAll("_", " ")}`;
 		if (!actions.includes(action)) {
 			actions.push(action);
 		}
@@ -747,8 +872,10 @@ export const getPayerConfigInternal = internalQuery({
 
 		return {
 			waitingPeriods: config.waitingPeriods as PayerConfig["waitingPeriods"],
-			exclusionsGeneral: config.exclusionsGeneral as PayerConfig["exclusionsGeneral"],
-			exclusionsSpecific: config.exclusionsSpecific as PayerConfig["exclusionsSpecific"],
+			exclusionsGeneral:
+				config.exclusionsGeneral as PayerConfig["exclusionsGeneral"],
+			exclusionsSpecific:
+				config.exclusionsSpecific as PayerConfig["exclusionsSpecific"],
 			sublimits: config.sublimits as PayerConfig["sublimits"],
 			annualMax: config.annualMax,
 			lifetimeMax: config.lifetimeMax,
@@ -760,6 +887,45 @@ export const getPayerConfigInternal = internalQuery({
 		};
 	},
 });
+
+/**
+ * Merge findings from a single document into the merged findings object
+ */
+function mergeDocumentFindings(
+	merged: ClinicalFindings,
+	findings: ClinicalFindings,
+): void {
+	if (findings.diagnoses) {
+		merged.diagnoses = [...(merged.diagnoses || []), ...findings.diagnoses];
+	}
+	if (findings.procedures) {
+		merged.procedures = [...(merged.procedures || []), ...findings.procedures];
+	}
+	if (findings.symptomDates) {
+		merged.symptomDates = [
+			...(merged.symptomDates || []),
+			...findings.symptomDates,
+		];
+	}
+	if (findings.medicalHistory) {
+		merged.medicalHistory = [
+			...(merged.medicalHistory || []),
+			...findings.medicalHistory,
+		];
+	}
+	if (findings.pecIndicators) {
+		merged.pecIndicators = [
+			...(merged.pecIndicators || []),
+			...findings.pecIndicators,
+		];
+	}
+	if (findings.relevantTags) {
+		merged.relevantTags = [
+			...(merged.relevantTags || []),
+			...findings.relevantTags,
+		];
+	}
+}
 
 /**
  * Internal query to get clinical findings for a GL request
@@ -786,13 +952,7 @@ export const getClinicalFindingsInternal = internalQuery({
 
 		for (const doc of docs) {
 			if (doc.parsedFindings) {
-				const f = doc.parsedFindings;
-				if (f.diagnoses) merged.diagnoses!.push(...f.diagnoses);
-				if (f.procedures) merged.procedures!.push(...f.procedures);
-				if (f.symptomDates) merged.symptomDates!.push(...f.symptomDates);
-				if (f.medicalHistory) merged.medicalHistory!.push(...f.medicalHistory);
-				if (f.pecIndicators) merged.pecIndicators!.push(...f.pecIndicators);
-				if (f.relevantTags) merged.relevantTags!.push(...f.relevantTags);
+				mergeDocumentFindings(merged, doc.parsedFindings);
 			}
 		}
 
@@ -808,7 +968,11 @@ export const updateGlWithRuleResults = internalMutation({
 		glId: v.id("glRequests"),
 		signals: v.array(v.any()),
 		missingItems: v.array(v.any()),
-		scoreBucket: v.union(v.literal("Low"), v.literal("Medium"), v.literal("High")),
+		scoreBucket: v.union(
+			v.literal("Low"),
+			v.literal("Medium"),
+			v.literal("High"),
+		),
 		approvalProbability: v.number(),
 		suggestedActions: v.array(v.string()),
 	},
@@ -863,19 +1027,23 @@ export const evaluateRulesForGlRequest = action({
 	},
 	handler: async (ctx, args): Promise<RuleEngineResult> => {
 		// Get the GL request
-		const gl = await ctx.runQuery(internal.glRequests.getInternal, { glId: args.glId });
+		const gl = await ctx.runQuery(internal.glRequests.getInternal, {
+			glId: args.glId,
+		});
 		if (!gl) {
 			throw new Error(`GL request not found: ${args.glId}`);
 		}
 
-		// Build case intake from GL request
+		// Build case intake from GL request (with defaults for optional fields)
 		const intake: CaseIntake = {
 			caseId: gl.caseId,
-			diagnosis: gl.diagnosis,
+			diagnosis: gl.diagnosis || "Unknown",
 			diagnosisCode: gl.diagnosisCode,
-			symptomStartDate: gl.symptomStartDate,
-			policyStartDate: gl.policyStartDate,
-			estimatedCost: gl.estimatedCost,
+			symptomStartDate:
+				gl.symptomStartDate || new Date().toISOString().split("T")[0],
+			policyStartDate:
+				gl.policyStartDate || new Date().toISOString().split("T")[0],
+			estimatedCost: gl.estimatedCost || 0,
 			patientName: gl.patientName,
 			encounterType: gl.encounterType,
 			plannedDate: gl.plannedDate,
@@ -886,15 +1054,26 @@ export const evaluateRulesForGlRequest = action({
 			attachments: gl.attachments,
 		};
 
+		// Ensure policyId exists before querying
+		if (!gl.policyId) {
+			throw new Error("GL request is missing policyId");
+		}
+
 		// Get policy clauses
-		const clauses = await ctx.runQuery(internal.rulesEngine.getPolicyClausesInternal, {
-			policyId: gl.policyId,
-		});
+		const clauses = await ctx.runQuery(
+			internal.rulesEngine.getPolicyClausesInternal,
+			{
+				policyId: gl.policyId,
+			},
+		);
 
 		// Get payer config
-		const config = await ctx.runQuery(internal.rulesEngine.getPayerConfigInternal, {
-			policyId: gl.policyId,
-		});
+		const config = await ctx.runQuery(
+			internal.rulesEngine.getPayerConfigInternal,
+			{
+				policyId: gl.policyId,
+			},
+		);
 
 		// Get clinical findings
 		const clinicalFindings = await ctx.runQuery(
@@ -929,11 +1108,11 @@ export const evaluateRulesForGlRequest = action({
 				scoreBucket: result.scoreBucket,
 				approvalProbability: result.approvalProbability,
 				signalCount: result.signals.length,
-				blockerCount: result.signals.filter((s) => s.severity === "Blocker").length,
+				blockerCount: result.signals.filter((s) => s.severity === "Blocker")
+					.length,
 			},
 		});
 
 		return result;
 	},
 });
-
