@@ -310,7 +310,7 @@ export default defineSchema({
 		riskScore: v.optional(v.number()),
 		scoreBucket: v.optional(riskBucket),
 		approvalProbability: v.optional(v.number()),
-		// Rule evaluation results
+		// Rule evaluation results (CL-16.2)
 		signals: v.optional(v.array(v.object({
 			ruleId: v.string(),
 			severity: severityLevel,
@@ -318,6 +318,7 @@ export default defineSchema({
 			clauseId: v.optional(v.string()),
 			clauseText: v.optional(v.string()),
 			evidence: v.optional(v.any()),
+			suggestedAction: v.optional(v.string()), // Action to resolve the signal
 		}))),
 		missingItems: v.optional(v.array(v.object({
 			type: v.string(),

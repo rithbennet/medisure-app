@@ -220,7 +220,7 @@ export const listByStatus = query({
 // ============== MUTATIONS ==============
 
 /**
- * Create a new GL request (for glRequests table)
+ * Create a new GL request (for glRequests table) - basic version
  */
 export const create = mutation({
 	args: {
@@ -240,6 +240,88 @@ export const create = mutation({
 			createdAt: Date.now(),
 		});
 		return glId;
+	},
+});
+
+/**
+ * Create a comprehensive GL request with all fields for AI analysis
+ * This is the unified mutation that supports the full workflow
+ */
+export const createComprehensive = mutation({
+	args: {
+		// Required fields
+		patientName: v.string(),
+		diagnosis: v.string(),
+		estimatedCost: v.number(),
+		policyId: v.id("policyDocuments"),
+		symptomStartDate: v.string(),
+		policyStartDate: v.string(),
+		// Optional fields for enhanced analysis
+		diagnosisCode: v.optional(v.string()),
+		encounterType: v.optional(v.union(
+			v.literal("inpatient"),
+			v.literal("outpatient"),
+			v.literal("ed"),
+			v.literal("day_surgery"),
+		)),
+		plannedDate: v.optional(v.string()),
+		emergencyFlag: v.optional(v.boolean()),
+		accidentFlag: v.optional(v.boolean()),
+		panelStatus: v.optional(v.union(
+			v.literal("panel"),
+			v.literal("non_panel"),
+			v.literal("unknown"),
+		)),
+		estimateBreakdown: v.optional(v.array(v.object({
+			category: v.string(),
+			amount: v.number(),
+		}))),
+		providerId: v.optional(v.string()),
+		// Document attachments (I-4.3)
+		attachments: v.optional(v.array(v.object({
+			type: v.string(),
+			fileName: v.string(),
+		}))),
+	},
+	handler: async (ctx, args) => {
+		const glId = await ctx.db.insert("glRequests", {
+			...args,
+			status: "pending",
+			createdAt: Date.now(),
+		});
+		return glId;
+	},
+});
+
+/**
+ * Ensure a default policy exists for the given insurer
+ * Returns existing policy ID or creates a new one
+ */
+export const ensureDefaultPolicy = mutation({
+	args: {
+		insurerName: v.string(),
+	},
+	handler: async (ctx, args) => {
+		// Check if a policy exists for this insurer
+		const existingPolicy = await ctx.db
+			.query("policyDocuments")
+			.withIndex("by_insurer", (q) => q.eq("insurerName", args.insurerName))
+			.first();
+
+		if (existingPolicy) {
+			return existingPolicy._id;
+		}
+
+		// Create a default policy for the insurer
+		const policyId = await ctx.db.insert("policyDocuments", {
+			insurerName: args.insurerName,
+			productName: `${args.insurerName} Standard Health Plan`,
+			planType: "Standard",
+			indexed: false,
+			createdAt: Date.now(),
+		});
+
+		return policyId;
 	},
 });
 

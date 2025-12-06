@@ -1,70 +1,52 @@
+'use server';
+
 /**
- * PDF Document Parsing API
- * Extracts text from uploaded PDF files
- * - First tries unpdf for native text extraction
- * - Falls back to Gemini OCR for scanned documents
+ * Server Action for PDF parsing
+ * Uses Server Actions body size limit (50MB) instead of API route limit (10MB)
  */
 
-import { NextResponse } from "next/server";
 import { extractText, getDocumentProxy, getMeta } from "unpdf";
 import { generateText } from "ai";
 import { getDocAnalysisModel } from "@/lib/aiProvider";
 
-// Route segment config for larger file uploads
-export const runtime = "nodejs";
-export const maxDuration = 60; // 60 seconds for Gemini OCR
+export interface ParsePdfResult {
+  success: boolean;
+  text?: string;
+  metadata?: {
+    fileName: string;
+    fileSize: number;
+    numPages: number | string;
+    textLength: number;
+    parseTimeMs: number;
+    method?: string;
+  };
+  error?: string;
+}
 
-// Max file size: 50MB
-const MAX_FILE_SIZE = 50 * 1024 * 1024;
-
-export async function POST(request: Request) {
+export async function parsePdfAction(formData: FormData): Promise<ParsePdfResult> {
   try {
-    // Check content length header first
-    const contentLength = request.headers.get("content-length");
-    if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: `File too large. Maximum size is 50MB. Your file appears to be ${(parseInt(contentLength) / 1024 / 1024).toFixed(1)}MB.` },
-        { status: 413 }
-      );
-    }
-
-    let formData: FormData;
-    try {
-      formData = await request.formData();
-    } catch (formError) {
-      console.error("[PDF Parse] FormData parsing error:", formError);
-      return NextResponse.json(
-        { error: "Failed to parse upload. File may be too large (max 50MB) or corrupted." },
-        { status: 400 }
-      );
-    }
-
     const file = formData.get("file") as File | null;
-    const docType = formData.get("docType") as string | null;
     const forceOcr = formData.get("forceOcr") === "true";
 
     if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
-    }
-
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 50MB.` },
-        { status: 413 }
-      );
+      return { success: false, error: "No file provided" };
     }
 
     // Validate file type
     if (!file.type.includes("pdf")) {
-      return NextResponse.json(
-        { error: "File must be a PDF" },
-        { status: 400 }
-      );
+      return { success: false, error: "File must be a PDF" };
+    }
+
+    // Validate file size (50MB max)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      return { 
+        success: false, 
+        error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 50MB.` 
+      };
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    // Create a copy of the buffer to avoid detachment issues
     const pdfBuffer = Buffer.from(arrayBuffer);
     const startTime = Date.now();
 
@@ -133,42 +115,33 @@ Output the extracted text only, no additional commentary.`,
         console.log("[PDF Parse] Gemini OCR extracted", text.length, "chars");
       } catch (ocrError) {
         console.error("[PDF Parse] Gemini OCR failed:", ocrError);
-        return NextResponse.json(
-          {
-            error: "Failed to extract text from PDF using Gemini OCR.",
-            details:
-              ocrError instanceof Error ? ocrError.message : "Unknown error",
-          },
-          { status: 500 }
-        );
+        return {
+          success: false,
+          error: `Failed to extract text using Gemini OCR: ${ocrError instanceof Error ? ocrError.message : "Unknown error"}`,
+        };
       }
     }
 
     const parseTimeMs = Date.now() - startTime;
 
-    return NextResponse.json({
+    return {
       success: true,
       text,
       metadata: {
         fileName: file.name,
         fileSize: file.size,
         numPages: totalPages || "unknown",
-        title: info?.Title || null,
-        author: info?.Author || null,
-        creationDate: info?.CreationDate || null,
-        parseTimeMs,
         textLength: text.length,
-        docType: docType || "unknown",
-        method, // "unpdf" or "gemini-ocr"
+        parseTimeMs,
+        method,
       },
-    });
+    };
   } catch (error) {
     console.error("PDF parsing error:", error);
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Failed to parse PDF",
-      },
-      { status: 500 }
-    );
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to parse PDF",
+    };
   }
 }
+

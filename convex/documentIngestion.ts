@@ -215,6 +215,113 @@ export const storePayerConfig = internalMutation({
 });
 
 /**
+ * Public mutation to store parsed clauses (can be called from API routes)
+ */
+export const savePolicyClauses = mutation({
+	args: {
+		policyId: v.id("policyDocuments"),
+		clauses: v.array(v.object({
+			clauseId: v.string(),
+			type: v.string(),
+			tags: v.array(v.string()),
+			text: v.string(),
+			pageRef: v.optional(v.union(v.string(), v.null())),
+			waitingPeriodDays: v.optional(v.union(v.number(), v.null())),
+			sublimitAmount: v.optional(v.union(v.number(), v.null())),
+			sublimitCategory: v.optional(v.union(v.string(), v.null())),
+		})),
+	},
+	handler: async (ctx, args) => {
+		const insertedIds = [];
+		for (const clause of args.clauses) {
+			const id = await ctx.db.insert("policyClauses", {
+				policyId: args.policyId,
+				clauseId: clause.clauseId,
+				type: clause.type as "waiting_period" | "exclusion_general" | "exclusion_specific" | "sublimit" | "coverage" | "doc_requirement" | "pec_definition",
+				tags: clause.tags,
+				text: clause.text,
+				// Convert null to undefined for optional fields
+				pageRef: clause.pageRef ?? undefined,
+				waitingPeriodDays: clause.waitingPeriodDays ?? undefined,
+				sublimitAmount: clause.sublimitAmount ?? undefined,
+				sublimitCategory: clause.sublimitCategory ?? undefined,
+				createdAt: Date.now(),
+			});
+			insertedIds.push(id);
+		}
+		
+		// Mark policy as completed
+		await ctx.db.patch(args.policyId, {
+			ingestionStatus: "completed",
+		});
+		
+		return insertedIds;
+	},
+});
+
+/**
+ * Public mutation to store payer config (can be called from API routes)
+ */
+export const savePayerConfig = mutation({
+	args: {
+		policyId: v.id("policyDocuments"),
+		config: v.object({
+			waitingPeriods: v.optional(v.union(v.array(v.object({
+				conditionTag: v.string(),
+				days: v.number(),
+			})), v.null())),
+			exclusionsGeneral: v.optional(v.union(v.array(v.object({
+				tag: v.string(),
+				description: v.string(),
+			})), v.null())),
+			sublimits: v.optional(v.union(v.array(v.object({
+				category: v.string(),
+				amount: v.number(),
+				currency: v.string(),
+			})), v.null())),
+			annualMax: v.optional(v.union(v.number(), v.null())),
+			lifetimeMax: v.optional(v.union(v.number(), v.null())),
+		}),
+	},
+	handler: async (ctx, args) => {
+		// Check if config exists
+		const existing = await ctx.db
+			.query("payerPlanConfig")
+			.withIndex("by_policy", (q) => q.eq("policyId", args.policyId))
+			.first();
+
+		const policy = await ctx.db.get(args.policyId);
+		const now = Date.now();
+
+		// Convert null to undefined for all fields
+		const cleanConfig = {
+			waitingPeriods: args.config.waitingPeriods ?? undefined,
+			exclusionsGeneral: args.config.exclusionsGeneral ?? undefined,
+			sublimits: args.config.sublimits ?? undefined,
+			annualMax: args.config.annualMax ?? undefined,
+			lifetimeMax: args.config.lifetimeMax ?? undefined,
+		};
+
+		if (existing) {
+			await ctx.db.patch(existing._id, {
+				...cleanConfig,
+				updatedAt: now,
+			});
+			return existing._id;
+		}
+
+		return await ctx.db.insert("payerPlanConfig", {
+			policyId: args.policyId,
+			payerName: policy?.insurerName || "Unknown",
+			planCode: policy?.productName || "Unknown",
+			...cleanConfig,
+			createdAt: now,
+			updatedAt: now,
+		});
+	},
+});
+
+/**
  * Mark policy ingestion as complete
  */
 export const markPolicyIngestionComplete = internalMutation({

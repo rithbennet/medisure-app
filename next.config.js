@@ -6,12 +6,15 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
-	// Increase body size limit for PDF uploads (default is 1mb, increase to 10mb)
+	// Increase body size limit for PDF uploads
 	experimental: {
 		serverActions: {
-			bodySizeLimit: "10mb",
+			bodySizeLimit: "50mb",
 		},
 	},
+	// Allow larger body sizes through middleware (for file uploads)
+	// @ts-ignore - This is a valid Next.js config option
+	middlewareClientMaxBodySize: "50mb",
 };
 
 export default config;

@@ -9,6 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { parsePdfAction } from "@/app/actions/parse-pdf";
 
 // ============== TYPES ==============
 
@@ -150,19 +151,14 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 		try {
 			const formData = new FormData();
 			formData.append("file", file);
-			formData.append("docType", "policy");
 
 			console.log("[PDF Upload] Uploading file:", file.name, file.size, "bytes");
 
-			const res = await fetch("/api/ai/parse-pdf", {
-				method: "POST",
-				body: formData,
-			});
-
-			const data = await res.json();
+			// Use Server Action for larger file support (up to 50MB)
+			const data = await parsePdfAction(formData);
 			console.log("[PDF Upload] Response:", data);
 
-			if (!res.ok) {
+			if (!data.success) {
 				throw new Error(data.error || "Failed to parse PDF");
 			}
 
@@ -176,15 +172,15 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 			// Set the extracted text
 			setPolicyText(data.text);
 			setPolicyPdfMeta({
-				fileName: data.metadata.fileName,
-				fileSize: data.metadata.fileSize,
-				numPages: data.metadata.numPages,
-				textLength: data.metadata.textLength,
-				parseTimeMs: data.metadata.parseTimeMs,
-				method: data.metadata.method,
+				fileName: data.metadata!.fileName,
+				fileSize: data.metadata!.fileSize,
+				numPages: data.metadata!.numPages,
+				textLength: data.metadata!.textLength,
+				parseTimeMs: data.metadata!.parseTimeMs,
+				method: data.metadata!.method,
 			});
 
-			console.log("[PDF Upload] Text set successfully, method:", data.metadata.method);
+			console.log("[PDF Upload] Text set successfully, method:", data.metadata!.method);
 		} catch (err) {
 			console.error("[PDF Upload] Error:", err);
 			setError(err instanceof Error ? err.message : "Failed to parse PDF");
@@ -208,27 +204,22 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 		try {
 			const formData = new FormData();
 			formData.append("file", file);
-			formData.append("docType", "clinical");
 
-			const res = await fetch("/api/ai/parse-pdf", {
-				method: "POST",
-				body: formData,
-			});
+			// Use Server Action for larger file support (up to 50MB)
+			const data = await parsePdfAction(formData);
 
-			const data = await res.json();
-
-			if (!res.ok) {
+			if (!data.success) {
 				throw new Error(data.error || "Failed to parse PDF");
 			}
 
 			// Set the extracted text
-			setClinicalText(data.text);
+			setClinicalText(data.text!);
 			setClinicalPdfMeta({
-				fileName: data.metadata.fileName,
-				fileSize: data.metadata.fileSize,
-				numPages: data.metadata.numPages,
-				textLength: data.metadata.textLength,
-				parseTimeMs: data.metadata.parseTimeMs,
+				fileName: data.metadata!.fileName,
+				fileSize: data.metadata!.fileSize,
+				numPages: data.metadata!.numPages,
+				textLength: data.metadata!.textLength,
+				parseTimeMs: data.metadata!.parseTimeMs,
 			});
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to parse PDF");

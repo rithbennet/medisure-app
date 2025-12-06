@@ -103,24 +103,53 @@ export async function POST(request: Request) {
 
 		// Store parsed clauses in Convex
 		if (parsed.clauses && parsed.clauses.length > 0) {
+			// Convert null values to undefined (Convex doesn't accept null for optional fields)
 			const clausesForDb = parsed.clauses.map((c) => ({
-				clauseId: c.clause_id,
+				clauseId: c.clause_id || `clause_${Math.random().toString(36).slice(2, 9)}`,
 				type: c.type,
 				tags: c.tags || [],
-				text: c.text,
-				pageRef: c.page_ref,
-				waitingPeriodDays: c.waiting_period_days,
-				sublimitAmount: c.sublimit_amount,
-				sublimitCategory: c.sublimit_category,
+				text: c.text || "",
+				pageRef: c.page_ref || undefined,
+				waitingPeriodDays: c.waiting_period_days ?? undefined,
+				sublimitAmount: c.sublimit_amount ?? undefined,
+				sublimitCategory: c.sublimit_category || undefined,
 			}));
 
-			// Using the internal mutation would require an action, so we'll handle this via API
-			// For now, return the parsed data to be stored by the client
+			// Save clauses to database
+			await convex.mutation(api.documentIngestion.savePolicyClauses, {
+				policyId: policyId as Id<"policyDocuments">,
+				clauses: clausesForDb,
+			});
+			
+			console.log(`[Parse Policy] Saved ${clausesForDb.length} clauses to database`);
 		}
 
 		// Store payer config if extracted
-		if (parsed.config) {
-			// Similar to above, return for client-side storage
+		if (parsed.config && (parsed.config.waiting_periods || parsed.config.exclusions_general || parsed.config.sublimits || parsed.config.annual_max)) {
+			await convex.mutation(api.documentIngestion.savePayerConfig, {
+				policyId: policyId as Id<"policyDocuments">,
+				config: {
+					waitingPeriods: parsed.config.waiting_periods?.map(wp => ({
+						conditionTag: wp.condition_tag,
+						days: wp.days,
+					})) ?? undefined,
+					exclusionsGeneral: parsed.config.exclusions_general?.map(e => ({
+						tag: e.tag,
+						description: e.description,
+					})) ?? undefined,
+					sublimits: parsed.config.sublimits
+						?.filter(s => s.amount != null && s.currency != null)
+						.map(s => ({
+							category: s.category,
+							amount: s.amount,
+							currency: s.currency,
+						})) ?? undefined,
+					annualMax: parsed.config.annual_max ?? undefined,
+					lifetimeMax: parsed.config.lifetime_max ?? undefined,
+				},
+			});
+			
+			console.log("[Parse Policy] Saved payer config to database");
 		}
 
 		return NextResponse.json({
