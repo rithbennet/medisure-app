@@ -1,3 +1,4 @@
+import { getSignUpUrl, withAuth } from "@workos-inc/authkit-nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -54,7 +55,10 @@ const howItWorks = [
 
 const techStack = ["Next.js", "Convex", "OpenAI", "Vector Search"];
 
-export default function HomePage() {
+export default async function HomePage() {
+	const { user } = await withAuth();
+	const signUpUrl = await getSignUpUrl();
+
 	return (
 		<div className="min-h-screen bg-gray-50 text-foreground">
 			<header className="absolute top-0 left-0 right-0 z-50 bg-transparent">
@@ -80,9 +84,19 @@ export default function HomePage() {
 							Insurer Portal
 						</Link>
 					</nav>
-					<Button asChild className="hidden md:inline-flex" size="sm">
-						<Link href="/dashboard">Enter Demo</Link>
-					</Button>
+					{user ? (
+						<Button className="hidden md:inline-flex" size={"sm" as const} asChild>
+							<Link href="/dashboard">
+								Go to Dashboard
+							</Link>
+						</Button>
+					) : (
+						<Button className="hidden md:inline-flex" size={"sm" as const} asChild>
+							<Link href={signUpUrl}>
+								Enter Demo
+							</Link>
+						</Button>
+					)}
 				</div>
 			</header>
 
@@ -107,13 +121,23 @@ export default function HomePage() {
 							</p>
 						</div>
 						<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-							<Button asChild size="lg">
-								<Link href="/dashboard">
-									Cut GL processing from 48 hours to 60 seconds — try it now
+							{user ? (
+								<Button size={"lg" as const} asChild>
+									<Link href="/dashboard">
+										Go to Dashboard
+									</Link>
+								</Button>
+							) : (
+								<Button size={"lg" as const} asChild>
+									<Link href={signUpUrl}>
+										Cut GL processing from 48 hours to 60 seconds — try it now
+									</Link>
+								</Button>
+							)}
+							<Button size={"lg" as const} variant="secondary" asChild>
+								<Link href="#demo">
+									View Insurer Portal
 								</Link>
-							</Button>
-							<Button asChild size="lg" variant="secondary">
-								<Link href="/insurer/gls">View Insurer Portal</Link>
 							</Button>
 						</div>
 						<p className="text-xs text-muted-foreground">
@@ -197,14 +221,18 @@ export default function HomePage() {
 									asChild
 									className="flex-1"
 									key={role.label}
-									size="lg"
+									size={"lg" as const}
 									variant={role.variant}
 								>
-									<Link href={role.href}>{role.label}</Link>
+									<Link href={user ? "/dashboard" : signUpUrl}>
+										{role.label}
+									</Link>
 								</Button>
 							))}
 						</div>
-						<p className="text-sm text-muted-foreground">No login required.</p>
+						<p className="text-sm text-muted-foreground">
+							{user ? "Welcome back!" : "No login required."}
+						</p>
 					</div>
 				</section>
 
