@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
 	/* Font Family */
@@ -9,32 +12,32 @@
 	/* shadcn/ui CSS Variables - Mapped to Design System */
 	--background: 247 248 250; /* #f7f8fa */
 	--foreground: 31 41 55; /* #1f2937 - Even darker for better readability */
-	
+
 	--card: 255 255 255;
 	--card-foreground: 31 41 55; /* #1f2937 */
-	
+
 	--popover: 255 255 255;
 	--popover-foreground: 31 41 55; /* #1f2937 */
-	
+
 	--primary: 62 99 246; /* #3e63f6 - Primary blue */
 	--primary-foreground: 255 255 255;
-	
+
 	--secondary: 247 248 250; /* #f7f8fa */
 	--secondary-foreground: 31 41 55; /* #1f2937 */
-	
+
 	--muted: 247 248 250; /* #f7f8fa */
 	--muted-foreground: 55 65 81; /* #374151 - Darker muted text for better readability */
-	
+
 	--accent: 247 248 250; /* #f7f8fa */
 	--accent-foreground: 13 15 20;
-	
+
 	--destructive: 220 58 58; /* #dc3a3a */
 	--destructive-foreground: 255 255 255;
-	
+
 	--border: 227 228 232; /* #e3e4e8 */
 	--input: 227 228 232; /* #e3e4e8 */
 	--ring: 62 99 246; /* #3e63f6 */
-	
+
 	--radius: 0.5rem; /* 8px - default border radius */
 
 	/* TailwindCSS v4 color definitions for utilities */
@@ -121,7 +124,7 @@
 	* {
 		border-color: rgb(var(--border));
 	}
-	
+
 	body {
 		background-color: rgb(var(--background));
 		color: rgb(var(--foreground));
@@ -166,4 +169,70 @@
 
 .shadow-marketing {
 	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+}
+
+:root {
+	--sidebar:
+		hsl(0 0% 98%);
+	--sidebar-foreground:
+		hsl(240 5.3% 26.1%);
+	--sidebar-primary:
+		hsl(240 5.9% 10%);
+	--sidebar-primary-foreground:
+		hsl(0 0% 98%);
+	--sidebar-accent:
+		hsl(240 4.8% 95.9%);
+	--sidebar-accent-foreground:
+		hsl(240 5.9% 10%);
+	--sidebar-border:
+		hsl(220 13% 91%);
+	--sidebar-ring:
+		hsl(217.2 91.2% 59.8%);
+}
+
+.dark {
+	--sidebar:
+		hsl(240 5.9% 10%);
+	--sidebar-foreground:
+		hsl(240 4.8% 95.9%);
+	--sidebar-primary:
+		hsl(224.3 76.3% 48%);
+	--sidebar-primary-foreground:
+		hsl(0 0% 100%);
+	--sidebar-accent:
+		hsl(240 3.7% 15.9%);
+	--sidebar-accent-foreground:
+		hsl(240 4.8% 95.9%);
+	--sidebar-border:
+		hsl(240 3.7% 15.9%);
+	--sidebar-ring:
+		hsl(217.2 91.2% 59.8%);
+}
+
+@theme inline {
+	--color-sidebar:
+		var(--sidebar);
+	--color-sidebar-foreground:
+		var(--sidebar-foreground);
+	--color-sidebar-primary:
+		var(--sidebar-primary);
+	--color-sidebar-primary-foreground:
+		var(--sidebar-primary-foreground);
+	--color-sidebar-accent:
+		var(--sidebar-accent);
+	--color-sidebar-accent-foreground:
+		var(--sidebar-accent-foreground);
+	--color-sidebar-border:
+		var(--sidebar-border);
+	--color-sidebar-ring:
+		var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+	}
+  body {
+    @apply bg-background text-foreground;
+	}
 }

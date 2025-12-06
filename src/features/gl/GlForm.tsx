@@ -25,6 +25,7 @@ export function GlForm() {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
@@ -63,6 +64,9 @@ export function GlForm() {
         diagnosis: values.diagnosis,
         estimatedCost,
       });
+
+      // Reset form to prevent duplicate submissions
+      reset();
 
       setSubmitState({
         status: 'success',
@@ -173,23 +177,38 @@ export function GlForm() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-4">
-        <Button
-          className="w-full sm:w-auto"
-          disabled={submitState.status === 'submitting'}
-          type="submit"
-        >
-          {submitState.status === 'submitting' ? 'Saving...' : 'Analyze risk'}
-        </Button>
-        <Button
-          className="w-full sm:w-auto"
-          disabled={submitState.status === 'submitting'}
-          type="button"
-          variant="outline"
-        >
-          Save draft
-        </Button>
-        {submitState.message && (
-          <p className="text-xs text-muted-foreground">{submitState.message}</p>
+        {submitState.status === 'success' ? (
+          <>
+            <Button
+              className="w-full sm:w-auto"
+              type="button"
+              onClick={() => setSubmitState({ status: 'idle' })}
+            >
+              Create another GL
+            </Button>
+            <p className="text-xs text-green-600">{submitState.message}</p>
+          </>
+        ) : (
+          <>
+            <Button
+              className="w-full sm:w-auto"
+              disabled={submitState.status === 'submitting'}
+              type="submit"
+            >
+              {submitState.status === 'submitting' ? 'Saving...' : 'Analyze risk'}
+            </Button>
+            <Button
+              className="w-full sm:w-auto"
+              disabled={submitState.status === 'submitting'}
+              type="button"
+              variant="outline"
+            >
+              Save draft
+            </Button>
+            {submitState.status === 'error' && submitState.message && (
+              <p className="text-xs text-red-600">{submitState.message}</p>
+            )}
+          </>
         )}
       </div>
     </form>
