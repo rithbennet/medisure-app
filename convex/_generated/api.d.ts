@@ -8,13 +8,23 @@
  * @module
  */
 
+import type * as documentIngestion from "../documentIngestion.js";
+import type * as glRequests from "../glRequests.js";
+import type * as policies from "../policies.js";
+import type * as rulesEngine from "../rulesEngine.js";
+
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
 
-declare const fullApi: ApiFromModules<{}>;
+declare const fullApi: ApiFromModules<{
+  documentIngestion: typeof documentIngestion;
+  glRequests: typeof glRequests;
+  policies: typeof policies;
+  rulesEngine: typeof rulesEngine;
+}>;
 
 /**
  * A utility for referencing Convex functions in your app's public API.

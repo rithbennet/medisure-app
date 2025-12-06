@@ -8,6 +8,11 @@ export const env = createEnv({
 	 */
 	server: {
 		NODE_ENV: z.enum(["development", "test", "production"]),
+		GOOGLE_API_KEY: z.string().min(1).optional(),
+		ANTHROPIC_API_KEY: z.string().min(1).optional(),
+		AI_PROVIDER: z.enum(["gemini", "anthropic"]).optional(),
+		AI_MODEL_GEMINI: z.string().optional(),
+		AI_MODEL_ANTHROPIC: z.string().optional(),
 	},
 
 	/**
@@ -27,6 +32,11 @@ export const env = createEnv({
 	runtimeEnv: {
 		NODE_ENV: process.env.NODE_ENV,
 		NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
+		GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
+		ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+		AI_PROVIDER: process.env.AI_PROVIDER,
+		AI_MODEL_GEMINI: process.env.AI_MODEL_GEMINI,
+		AI_MODEL_ANTHROPIC: process.env.AI_MODEL_ANTHROPIC,
 	},
 	/**
 	 * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
