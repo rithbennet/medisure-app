@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation } from 'convex/react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,6 @@ export function GlForm() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
@@ -35,19 +34,28 @@ export function GlForm() {
     },
   });
 
-  const insurerName = watch('insurerName');
-
-  const demoPolicies = useQuery(api.policies.listDemoPolicies, {});
   const createGL = useMutation(api.glRequests.createGLRequest);
 
   const [submitState, setSubmitState] = useState<SubmitState>({
     status: 'idle',
   });
 
-  const matchedPolicy = useMemo(
-    () => demoPolicies?.find((p) => p.insurerName === insurerName) ?? null,
-    [demoPolicies, insurerName],
-  );
+  const [policyFile, setPolicyFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      setPolicyFile(file);
+    }
+  }
+
+  function handleRemoveFile() {
+    setPolicyFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }
 
   async function onSubmit(values: FormValues) {
     try {
@@ -138,35 +146,72 @@ export function GlForm() {
 
         <div className="space-y-2 text-sm">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Policy auto lookup
+            Policy document
           </p>
           <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm">
-            {matchedPolicy ? (
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
-                  Demo Policy
-                </p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {matchedPolicy.productName}
+            {policyFile ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="h-5 w-5 text-red-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M4 18h12a2 2 0 002-2V6l-4-4H4a2 2 0 00-2 2v12a2 2 0 002 2zm8-14l4 4h-4V4zM6 10h8v2H6v-2zm0 4h5v2H6v-2z" />
+                  </svg>
+                  <span className="flex-1 truncate text-sm font-medium text-gray-900">
+                    {policyFile.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {(policyFile.size / 1024).toFixed(1)} KB
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Plan type: {matchedPolicy.planType}
-                </p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  This GL will be analysed against the indexed clauses for this
-                  policy.
+                  This GL will be analysed against the uploaded policy document.
                 </p>
               </div>
             ) : (
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-900">
-                  No indexed policy available.
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  For this insurer we don&apos;t yet have a demo policy. In the
-                  full version, you&apos;ll be able to upload a PDF here.
-                </p>
-              </div>
+              <label className="block cursor-pointer">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <div className="flex flex-col items-center gap-2 py-3 text-center">
+                  <svg
+                    className="h-8 w-8 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-blue-600 hover:text-blue-700">
+                      Upload policy PDF
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Click to browse or drag and drop
+                    </p>
+                  </div>
+                </div>
+              </label>
             )}
           </div>
         </div>

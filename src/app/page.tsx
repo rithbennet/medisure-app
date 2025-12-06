@@ -86,7 +86,7 @@ export default async function HomePage() {
 					</nav>
 					{user ? (
 						<Button className="hidden md:inline-flex" size={"sm" as const} asChild>
-							<Link href="/dashboard">
+							<Link href="/activity">
 								Go to Dashboard
 							</Link>
 						</Button>
