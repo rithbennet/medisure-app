@@ -7,13 +7,13 @@ import {
 } from "@/components/ui/card";
 
 type GLDetailPageProps = {
-	params: {
+	params: Promise<{
 		id: string;
-	};
+	}>;
 };
 
-export default function GLDetailPage({ params }: GLDetailPageProps) {
-	const { id } = params;
+export default async function GLDetailPage({ params }: GLDetailPageProps) {
+	const { id } = await params;
 
 	return (
 		<div className="space-y-6">
@@ -21,23 +21,24 @@ export default function GLDetailPage({ params }: GLDetailPageProps) {
 				<Card className="bg-white shadow-soft-md">
 					<CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 						<div className="space-y-1.5">
-							<p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+							<p className="text-muted-foreground text-xs uppercase tracking-[0.3em]">
 								Guarantee Letter
 							</p>
-							<CardTitle className="text-section-title text-gray-900">
+							<CardTitle className="text-gray-900 text-section-title">
 								GL #{id}
 							</CardTitle>
-							<CardDescription className="text-sm text-muted-foreground">
+							<CardDescription className="text-muted-foreground text-sm">
 								Edit the request, review AI risk analysis, and generate an
 								explanation letter.
 							</CardDescription>
 						</div>
-						<div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+						<div className="flex flex-wrap gap-2 text-muted-foreground text-xs">
 							<span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1">
 								Status: <span className="font-medium text-gray-900">Draft</span>
 							</span>
 							<span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1">
-								Risk band: <span className="font-medium text-gray-900">TBD</span>
+								Risk band:{" "}
+								<span className="font-medium text-gray-900">TBD</span>
 							</span>
 						</div>
 					</CardHeader>
@@ -56,7 +57,7 @@ export default function GLDetailPage({ params }: GLDetailPageProps) {
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-muted-foreground text-sm">
 							This is a placeholder layout. In later steps, it will be wired to
 							Convex data and the shared `GLFormFields` component.
 						</p>
@@ -69,12 +70,12 @@ export default function GLDetailPage({ params }: GLDetailPageProps) {
 							Risk &amp; actions
 						</CardTitle>
 						<CardDescription>
-							Displays AI risk band, reasons, and actions like letter
-							generation and outcome simulation.
+							Displays AI risk band, reasons, and actions like letter generation
+							and outcome simulation.
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-muted-foreground text-sm">
 							This panel will host the `RiskResultPanel`, letter generator, and
 							insurer outcome controls, styled consistently with the rest of the
 							dashboard.
@@ -85,5 +86,3 @@ export default function GLDetailPage({ params }: GLDetailPageProps) {
 		</div>
 	);
 }
-
-

@@ -57,7 +57,7 @@ export default defineSchema({
 			v.literal("coordinator"), // Admin role
 			v.literal("patient"),
 			v.literal("doctor"),
-			v.literal("insurance_agent")
+			v.literal("insurance_agent"),
 		),
 		workosId: v.optional(v.string()), // WorkOS user ID for OAuth users
 		profileComplete: v.optional(v.boolean()), // Whether the user has completed their profile (added IC) - defaults to true for existing users
@@ -115,12 +115,14 @@ export default defineSchema({
 		fileUrl: v.optional(v.string()),
 		// Extended fields for document ingestion
 		rawText: v.optional(v.string()),
-		parsedMetadata: v.optional(v.object({
-			totalPages: v.optional(v.number()),
-			extractedDate: v.optional(v.string()),
-			documentType: v.optional(v.string()),
-			version: v.optional(v.string()),
-		})),
+		parsedMetadata: v.optional(
+			v.object({
+				totalPages: v.optional(v.number()),
+				extractedDate: v.optional(v.string()),
+				documentType: v.optional(v.string()),
+				version: v.optional(v.string()),
+			}),
+		),
 		ingestionStatus: v.optional(ingestionStatus),
 		indexed: v.boolean(),
 		createdAt: v.number(),
@@ -170,42 +172,62 @@ export default defineSchema({
 		payerName: v.string(),
 		planCode: v.string(),
 		// Waiting periods by condition/procedure tags
-		waitingPeriods: v.optional(v.array(v.object({
-			conditionTag: v.string(),
-			days: v.number(),
-			clauseId: v.optional(v.string()),
-		}))),
+		waitingPeriods: v.optional(
+			v.array(
+				v.object({
+					conditionTag: v.string(),
+					days: v.number(),
+					clauseId: v.optional(v.string()),
+				}),
+			),
+		),
 		// General exclusions with tags
-		exclusionsGeneral: v.optional(v.array(v.object({
-			tag: v.string(),
-			description: v.string(),
-			clauseId: v.optional(v.string()),
-		}))),
+		exclusionsGeneral: v.optional(
+			v.array(
+				v.object({
+					tag: v.string(),
+					description: v.string(),
+					clauseId: v.optional(v.string()),
+				}),
+			),
+		),
 		// Specific exclusions (ICD-10 or procedure codes)
-		exclusionsSpecific: v.optional(v.array(v.object({
-			code: v.string(),
-			codeType: v.union(v.literal("icd10"), v.literal("procedure")),
-			description: v.string(),
-			clauseId: v.optional(v.string()),
-		}))),
+		exclusionsSpecific: v.optional(
+			v.array(
+				v.object({
+					code: v.string(),
+					codeType: v.union(v.literal("icd10"), v.literal("procedure")),
+					description: v.string(),
+					clauseId: v.optional(v.string()),
+				}),
+			),
+		),
 		// Sublimits per category
-		sublimits: v.optional(v.array(v.object({
-			category: v.string(), // e.g., "room_board", "surgical_fee", "icu"
-			amount: v.number(),
-			currency: v.string(),
-			period: v.optional(v.string()), // "per_admission", "per_day", "annual"
-			clauseId: v.optional(v.string()),
-		}))),
+		sublimits: v.optional(
+			v.array(
+				v.object({
+					category: v.string(), // e.g., "room_board", "surgical_fee", "icu"
+					amount: v.number(),
+					currency: v.string(),
+					period: v.optional(v.string()), // "per_admission", "per_day", "annual"
+					clauseId: v.optional(v.string()),
+				}),
+			),
+		),
 		// Annual/lifetime maximums
 		annualMax: v.optional(v.number()),
 		lifetimeMax: v.optional(v.number()),
 		currency: v.optional(v.string()),
 		// Required fields/docs matrix (by encounter type)
-		requiredDocs: v.optional(v.array(v.object({
-			encounterType: v.string(),
-			docTypes: v.array(v.string()),
-			conditionTags: v.optional(v.array(v.string())),
-		}))),
+		requiredDocs: v.optional(
+			v.array(
+				v.object({
+					encounterType: v.string(),
+					docTypes: v.array(v.string()),
+					conditionTags: v.optional(v.array(v.string())),
+				}),
+			),
+		),
 		// Notification windows
 		electiveLeadTimeDays: v.optional(v.number()),
 		edNotificationHours: v.optional(v.number()),
@@ -235,14 +257,16 @@ export default defineSchema({
 		fileName: v.optional(v.string()),
 		rawText: v.string(),
 		// Parsed findings from Gemini
-		parsedFindings: v.optional(v.object({
-			diagnoses: v.optional(v.array(v.string())),
-			procedures: v.optional(v.array(v.string())),
-			symptomDates: v.optional(v.array(v.string())),
-			medicalHistory: v.optional(v.array(v.string())),
-			pecIndicators: v.optional(v.array(v.string())), // Pre-existing condition hints
-			relevantTags: v.optional(v.array(v.string())),
-		})),
+		parsedFindings: v.optional(
+			v.object({
+				diagnoses: v.optional(v.array(v.string())),
+				procedures: v.optional(v.array(v.string())),
+				symptomDates: v.optional(v.array(v.string())),
+				medicalHistory: v.optional(v.array(v.string())),
+				pecIndicators: v.optional(v.array(v.string())), // Pre-existing condition hints
+				relevantTags: v.optional(v.array(v.string())),
+			}),
+		),
 		ingestionStatus: ingestionStatus,
 		createdAt: v.number(),
 	})
@@ -282,48 +306,64 @@ export default defineSchema({
 		patientName: v.optional(v.string()),
 		providerId: v.optional(v.string()),
 		// Extended case intake fields (15.1 schema partial)
-		encounterType: v.optional(v.union(
-			v.literal("inpatient"),
-			v.literal("outpatient"),
-			v.literal("ed"),
-			v.literal("day_surgery"),
-		)),
+		encounterType: v.optional(
+			v.union(
+				v.literal("inpatient"),
+				v.literal("outpatient"),
+				v.literal("ed"),
+				v.literal("day_surgery"),
+			),
+		),
 		plannedDate: v.optional(v.string()),
 		emergencyFlag: v.optional(v.boolean()),
 		accidentFlag: v.optional(v.boolean()),
-		panelStatus: v.optional(v.union(
-			v.literal("panel"),
-			v.literal("non_panel"),
-			v.literal("unknown"),
-		)),
-		estimateBreakdown: v.optional(v.array(v.object({
-			category: v.string(),
-			amount: v.number(),
-		}))),
-		attachments: v.optional(v.array(v.object({
-			type: v.string(),
-			fileName: v.string(),
-			docId: v.optional(v.id("clinicalDocuments")),
-		}))),
+		panelStatus: v.optional(
+			v.union(v.literal("panel"), v.literal("non_panel"), v.literal("unknown")),
+		),
+		estimateBreakdown: v.optional(
+			v.array(
+				v.object({
+					category: v.string(),
+					amount: v.number(),
+				}),
+			),
+		),
+		attachments: v.optional(
+			v.array(
+				v.object({
+					type: v.string(),
+					fileName: v.string(),
+					docId: v.optional(v.id("clinicalDocuments")),
+				}),
+			),
+		),
 		// Status and risk
 		status: v.optional(glStatus),
 		riskScore: v.optional(v.number()),
 		scoreBucket: v.optional(riskBucket),
 		approvalProbability: v.optional(v.number()),
 		// Rule evaluation results
-		signals: v.optional(v.array(v.object({
-			ruleId: v.string(),
-			severity: severityLevel,
-			message: v.string(),
-			clauseId: v.optional(v.string()),
-			clauseText: v.optional(v.string()),
-			evidence: v.optional(v.any()),
-		}))),
-		missingItems: v.optional(v.array(v.object({
-			type: v.string(),
-			key: v.string(),
-			reason: v.string(),
-		}))),
+		signals: v.optional(
+			v.array(
+				v.object({
+					ruleId: v.string(),
+					severity: severityLevel,
+					message: v.string(),
+					clauseId: v.optional(v.string()),
+					clauseText: v.optional(v.string()),
+					evidence: v.optional(v.any()),
+				}),
+			),
+		),
+		missingItems: v.optional(
+			v.array(
+				v.object({
+					type: v.string(),
+					key: v.string(),
+					reason: v.string(),
+				}),
+			),
+		),
 		suggestedActions: v.optional(v.array(v.string())),
 		// AI outputs
 		aiExplanation: v.optional(v.string()),
@@ -377,13 +417,15 @@ export default defineSchema({
 			approvalProbability: v.number(),
 		}),
 		// AI model outputs
-		aiOutputs: v.optional(v.object({
-			model: v.string(),
-			provider: v.string(),
-			narrative: v.optional(v.string()),
-			structuredResult: v.optional(v.any()),
-			latencyMs: v.optional(v.number()),
-		})),
+		aiOutputs: v.optional(
+			v.object({
+				model: v.string(),
+				provider: v.string(),
+				narrative: v.optional(v.string()),
+				structuredResult: v.optional(v.any()),
+				latencyMs: v.optional(v.number()),
+			}),
+		),
 		createdAt: v.number(),
 	})
 		.index("by_gl_request", ["glRequestId"])
@@ -411,4 +453,3 @@ export default defineSchema({
 		.index("by_action", ["action"])
 		.index("by_timestamp", ["timestamp"]),
 });
-

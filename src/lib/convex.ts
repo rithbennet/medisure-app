@@ -6,5 +6,5 @@ import { env } from "@/env";
  * This client is used to call Convex functions from Next.js API routes
  */
 export function getConvexClient(): ConvexHttpClient {
-  return new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL);
+	return new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL);
 }

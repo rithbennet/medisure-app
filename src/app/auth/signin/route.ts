@@ -1,6 +1,6 @@
+import { getSignInUrl, getWorkOS, withAuth } from "@workos-inc/authkit-nextjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getSignInUrl, getWorkOS, withAuth } from "@workos-inc/authkit-nextjs";
 
 export async function GET() {
 	const cookieStore = await cookies();
@@ -36,4 +36,3 @@ export async function GET() {
 	const signInUrl = await getSignInUrl();
 	redirect(signInUrl);
 }
-

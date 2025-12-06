@@ -1,9 +1,14 @@
-import { mutation, query, type MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { internalMutation, internalQuery } from "./_generated/server";
-
-import { lookupPolicyForUser, type PolicyMetadata } from "./utils/policyLookup";
+import type { Doc } from "./_generated/dataModel";
+import {
+	internalMutation,
+	internalQuery,
+	type MutationCtx,
+	mutation,
+	query,
+} from "./_generated/server";
 import { logActivity } from "./utils/activityLog";
+import { lookupPolicyForUser, type PolicyMetadata } from "./utils/policyLookup";
 
 type CreateGLArgs = {
 	patientName: string;
@@ -35,7 +40,10 @@ export const createGLRequest = mutation({
 		diagnosis: v.string(),
 		estimatedCost: v.optional(v.number()),
 	},
-	async handler(ctx: MutationCtx, args: CreateGLArgs): Promise<GLRequestWithPolicy> {
+	async handler(
+		ctx: MutationCtx,
+		args: CreateGLArgs,
+	): Promise<GLRequestWithPolicy> {
 		const now = Date.now();
 		const matchedPolicy = lookupPolicyForUser(args.insurerName);
 
@@ -82,21 +90,21 @@ export const getGLRequests = query({
 		const gls = await ctx.db.query("gl_requests").collect();
 
 		return gls
-			.sort((a, b) => (b.createdAt as number) - (a.createdAt as number))
-			.map((gl: any) => {
-				const matchedPolicy = lookupPolicyForUser(gl.insurerName as string);
+			.sort((a, b) => b.createdAt - a.createdAt)
+			.map((gl: Doc<"gl_requests">) => {
+				const matchedPolicy = lookupPolicyForUser(gl.insurerName);
 
 				return {
 					_id: gl._id as string,
-					creationTime: gl.createdAt as number,
-					patientName: gl.patientName as string,
-					insurerName: gl.insurerName as string,
-					diagnosis: gl.diagnosis as string,
-					estimatedCost: gl.estimatedCost as number | undefined,
-					status: gl.status as string,
+					creationTime: gl.createdAt,
+					patientName: gl.patientName,
+					insurerName: gl.insurerName,
+					diagnosis: gl.diagnosis,
+					estimatedCost: gl.estimatedCost,
+					status: gl.status,
 					policyId: gl.policyId as string | null | undefined,
-					riskBand: gl.riskBand as string | undefined,
-					riskExplanation: gl.riskExplanation as string | undefined,
+					riskBand: gl.riskBand,
+					riskExplanation: gl.riskExplanation,
 					policy: matchedPolicy,
 				};
 			});
@@ -283,4 +291,3 @@ export const updateStatus = mutation({
 		await ctx.db.patch(args.glId, { status: args.status });
 	},
 });
-

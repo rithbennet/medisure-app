@@ -34,9 +34,21 @@ const benefits = [
 ];
 
 const demoRoles = [
-	{ label: "Enter as GL Coordinator", variant: "default" as const, href: "/dashboard" },
-	{ label: "Enter as Doctor", variant: "secondary" as const, href: "/policies" },
-	{ label: "Enter as Insurer", variant: "secondary" as const, href: "/insurer/gls" },
+	{
+		label: "Enter as GL Coordinator",
+		variant: "default" as const,
+		href: "/dashboard",
+	},
+	{
+		label: "Enter as Doctor",
+		variant: "secondary" as const,
+		href: "/policies",
+	},
+	{
+		label: "Enter as Insurer",
+		variant: "secondary" as const,
+		href: "/insurer/gls",
+	},
 ];
 
 const howItWorks = [
@@ -74,28 +86,41 @@ export default async function HomePage() {
 							width={120}
 						/>
 					</div>
-					<nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-						<Link className="transition-colors hover:text-foreground" href="/dashboard">
+					<nav className="hidden items-center gap-8 text-muted-foreground text-sm md:flex">
+						<Link
+							className="transition-colors hover:text-foreground"
+							href="/dashboard"
+						>
 							Dashboard
 						</Link>
-						<Link className="transition-colors hover:text-foreground" href="/policies">
+						<Link
+							className="transition-colors hover:text-foreground"
+							href="/policies"
+						>
 							Policies
 						</Link>
-						<Link className="transition-colors hover:text-foreground" href="/insurer/gls">
+						<Link
+							className="transition-colors hover:text-foreground"
+							href="/insurer/gls"
+						>
 							Insurer Portal
 						</Link>
 					</nav>
 					{user ? (
-						<Button className="hidden md:inline-flex" size={"sm" as const} asChild>
-							<Link href="/activity">
-								Go to Dashboard
-							</Link>
+						<Button
+							asChild
+							className="hidden md:inline-flex"
+							size={"sm" as const}
+						>
+							<Link href="/activity">Go to Dashboard</Link>
 						</Button>
 					) : (
-						<Button className="hidden md:inline-flex" size={"sm" as const} asChild>
-							<Link href={signUpUrl}>
-								Enter Demo
-							</Link>
+						<Button
+							asChild
+							className="hidden md:inline-flex"
+							size={"sm" as const}
+						>
+							<Link href={signUpUrl}>Enter Demo</Link>
 						</Button>
 					)}
 				</div>
@@ -120,22 +145,18 @@ export default async function HomePage() {
 						</div>
 						<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
 							{user ? (
-								<Button size={"lg" as const} asChild>
-									<Link href="/dashboard">
-										Go to Dashboard
-									</Link>
+								<Button asChild size={"lg" as const}>
+									<Link href="/dashboard">Go to Dashboard</Link>
 								</Button>
 							) : (
-								<Button size={"lg" as const} asChild>
+								<Button asChild size={"lg" as const}>
 									<Link href={signUpUrl}>
 										Cut GL processing from 48 hours to 60 seconds — try it now
 									</Link>
 								</Button>
 							)}
-							<Button size={"lg" as const} variant="secondary" asChild>
-								<Link href="#demo">
-									View Insurer Portal
-								</Link>
+							<Button asChild size={"lg" as const} variant="secondary">
+								<Link href="#demo">View Insurer Portal</Link>
 							</Button>
 						</div>
 						<p className="text-muted-foreground text-xs">
@@ -222,7 +243,7 @@ export default async function HomePage() {
 								</Button>
 							))}
 						</div>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-muted-foreground text-sm">
 							{user ? "Welcome back!" : "No login required."}
 						</p>
 					</div>

@@ -25,7 +25,14 @@ export interface RiskAnalysisResult {
 
 export interface ParsedClause {
 	clause_id: string;
-	type: "waiting_period" | "exclusion_general" | "exclusion_specific" | "sublimit" | "coverage" | "doc_requirement" | "pec_definition";
+	type:
+		| "waiting_period"
+		| "exclusion_general"
+		| "exclusion_specific"
+		| "sublimit"
+		| "coverage"
+		| "doc_requirement"
+		| "pec_definition";
 	tags: string[];
 	text: string;
 	page_ref?: string;
@@ -203,7 +210,10 @@ export function combineChunksToContext(
  * @param insurerName - Name of the insurer for context
  * @returns Formatted prompt string
  */
-export function buildPolicyParsingPrompt(rawText: string, insurerName: string): string {
+export function buildPolicyParsingPrompt(
+	rawText: string,
+	insurerName: string,
+): string {
 	return `You are an expert insurance policy analyst. Parse the following insurance policy document and extract structured clause information.
 
 ## Policy Document

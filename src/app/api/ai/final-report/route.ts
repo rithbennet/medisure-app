@@ -4,20 +4,20 @@
  */
 
 import { generateText, streamText } from "ai";
+import { ConvexHttpClient } from "convex/browser";
 import { NextResponse } from "next/server";
-import { getRiskAssessmentModel, getModelForRole } from "@/lib/aiProvider";
+import { env } from "@/env";
+import { getModelForRole } from "@/lib/aiProvider";
 import {
 	buildFinalRiskReportPrompt,
 	buildSimpleNarrativePrompt,
 	type CaseIntakeForReport,
-	type RuleEngineOutput,
-	type ParsedClause,
 	type FinalRiskReport,
+	type ParsedClause,
+	type RuleEngineOutput,
 } from "@/lib/promptFactory";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../../convex/_generated/api";
 import type { Id } from "../../../../../convex/_generated/dataModel";
-import { env } from "@/env";
 
 const convex = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL);
 
@@ -30,10 +30,7 @@ export async function POST(request: Request) {
 		};
 
 		if (!glId) {
-			return NextResponse.json(
-				{ error: "glId is required" },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: "glId is required" }, { status: 400 });
 		}
 
 		// Get GL request data
@@ -75,19 +72,30 @@ export async function POST(request: Request) {
 
 		// Build rule engine output
 		const ruleOutput: RuleEngineOutput = {
-			signals: (glRequest.signals || []).map((s: { ruleId: string; severity: "Blocker" | "Warning" | "Info"; message: string; clauseId?: string; clauseText?: string; evidence?: Record<string, unknown> }) => ({
-				rule_id: s.ruleId,
-				severity: s.severity as "Blocker" | "Warning" | "Info",
-				message: s.message,
-				clause_id: s.clauseId,
-				clause_text: s.clauseText,
-				evidence: s.evidence,
-			})),
-			missing_items: (glRequest.missingItems || []).map((m: { type: string; key: string; reason: string }) => ({
-				type: m.type,
-				key: m.key,
-				reason: m.reason,
-			})),
+			signals: (glRequest.signals || []).map(
+				(s: {
+					ruleId: string;
+					severity: "Blocker" | "Warning" | "Info";
+					message: string;
+					clauseId?: string;
+					clauseText?: string;
+					evidence?: Record<string, unknown>;
+				}) => ({
+					rule_id: s.ruleId,
+					severity: s.severity as "Blocker" | "Warning" | "Info",
+					message: s.message,
+					clause_id: s.clauseId,
+					clause_text: s.clauseText,
+					evidence: s.evidence,
+				}),
+			),
+			missing_items: (glRequest.missingItems || []).map(
+				(m: { type: string; key: string; reason: string }) => ({
+					type: m.type,
+					key: m.key,
+					reason: m.reason,
+				}),
+			),
 			score_bucket: glRequest.scoreBucket as "Low" | "Medium" | "High",
 			approval_probability: glRequest.approvalProbability || 0.5,
 			suggested_actions: glRequest.suggestedActions || [],
@@ -98,16 +106,27 @@ export async function POST(request: Request) {
 			policyId: glRequest.policyId,
 		});
 
-		const parsedClauses: ParsedClause[] = clauses.map((c: { clauseId: string; type: string; tags: string[]; text: string; pageRef?: string; waitingPeriodDays?: number; sublimitAmount?: number; sublimitCategory?: string }) => ({
-			clause_id: c.clauseId,
-			type: c.type as ParsedClause["type"],
-			tags: c.tags,
-			text: c.text,
-			page_ref: c.pageRef,
-			waiting_period_days: c.waitingPeriodDays,
-			sublimit_amount: c.sublimitAmount,
-			sublimit_category: c.sublimitCategory,
-		}));
+		const parsedClauses: ParsedClause[] = clauses.map(
+			(c: {
+				clauseId: string;
+				type: string;
+				tags: string[];
+				text: string;
+				pageRef?: string;
+				waitingPeriodDays?: number;
+				sublimitAmount?: number;
+				sublimitCategory?: string;
+			}) => ({
+				clause_id: c.clauseId,
+				type: c.type as ParsedClause["type"],
+				tags: c.tags,
+				text: c.text,
+				page_ref: c.pageRef,
+				waiting_period_days: c.waitingPeriodDays,
+				sublimit_amount: c.sublimitAmount,
+				sublimit_category: c.sublimitCategory,
+			}),
+		);
 
 		// Get Claude model for risk assessment
 		const { model, modelName } = getModelForRole("risk_assessment");
@@ -218,4 +237,3 @@ export async function POST(request: Request) {
 		);
 	}
 }
-

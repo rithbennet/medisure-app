@@ -99,7 +99,9 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 	const [isUploadingPolicyPdf, setIsUploadingPolicyPdf] = useState(false);
 	const [isUploadingClinicalPdf, setIsUploadingClinicalPdf] = useState(false);
 	const [policyPdfMeta, setPolicyPdfMeta] = useState<PdfMetadata | null>(null);
-	const [clinicalPdfMeta, setClinicalPdfMeta] = useState<PdfMetadata | null>(null);
+	const [clinicalPdfMeta, setClinicalPdfMeta] = useState<PdfMetadata | null>(
+		null,
+	);
 	const [policyParseResult, setPolicyParseResult] = useState<{
 		clauseCount: number;
 		configExtracted: boolean;
@@ -109,7 +111,7 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 	} | null>(null);
 
 	// State for case intake
-	const [caseIntake, setCaseIntake] = useState<CaseIntake>({
+	const [caseIntake, _setCaseIntake] = useState<CaseIntake>({
 		diagnosis: "Acute appendicitis",
 		diagnosisCode: "K35.80",
 		symptomStartDate: "2024-10-28",
@@ -139,7 +141,9 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 
 	// ============== HANDLERS ==============
 
-	const handlePolicyPdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handlePolicyPdfUpload = async (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
 
@@ -152,7 +156,12 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 			formData.append("file", file);
 			formData.append("docType", "policy");
 
-			console.log("[PDF Upload] Uploading file:", file.name, file.size, "bytes");
+			console.log(
+				"[PDF Upload] Uploading file:",
+				file.name,
+				file.size,
+				"bytes",
+			);
 
 			const res = await fetch("/api/ai/parse-pdf", {
 				method: "POST",
@@ -168,7 +177,9 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 
 			// Check if text was extracted
 			if (!data.text || data.text.trim().length === 0) {
-				throw new Error("No text could be extracted from this PDF. It might be a scanned image or have no readable text.");
+				throw new Error(
+					"No text could be extracted from this PDF. It might be a scanned image or have no readable text.",
+				);
 			}
 
 			console.log("[PDF Upload] Extracted text length:", data.text.length);
@@ -184,7 +195,10 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 				method: data.metadata.method,
 			});
 
-			console.log("[PDF Upload] Text set successfully, method:", data.metadata.method);
+			console.log(
+				"[PDF Upload] Text set successfully, method:",
+				data.metadata.method,
+			);
 		} catch (err) {
 			console.error("[PDF Upload] Error:", err);
 			setError(err instanceof Error ? err.message : "Failed to parse PDF");
@@ -197,7 +211,9 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 		}
 	};
 
-	const handleClinicalPdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleClinicalPdfUpload = async (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
 
@@ -415,21 +431,30 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 				</CardHeader>
 				<CardContent className="space-y-6">
 					{/* Debug info */}
-					<div className="rounded-lg bg-gray-100 p-2 font-mono text-xs text-gray-600">
-						<span className="font-semibold">Debug:</span>{" "}
-						policyId={policyId ? `"${policyId}"` : "undefined"},{" "}
-						glId={glId ? `"${glId}"` : "undefined"}
+					<div className="rounded-lg bg-gray-100 p-2 font-mono text-gray-600 text-xs">
+						<span className="font-semibold">Debug:</span> policyId=
+						{policyId ? `"${policyId}"` : "undefined"}, glId=
+						{glId ? `"${glId}"` : "undefined"}
 					</div>
 
 					{/* Warning banner when no policyId */}
 					{!policyId && (
 						<div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm">
-							<svg className="h-5 w-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-								<path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+							<svg
+								className="h-5 w-5 flex-shrink-0"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+							>
+								<path
+									clipRule="evenodd"
+									d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
+									fillRule="evenodd"
+								/>
 							</svg>
 							<span>
-								<strong>Create demo data first</strong> (above) to enable clause extraction and rule evaluation.
-								You can still upload/parse PDFs to preview text.
+								<strong>Create demo data first</strong> (above) to enable clause
+								extraction and rule evaluation. You can still upload/parse PDFs
+								to preview text.
 							</span>
 						</div>
 					)}
@@ -457,11 +482,11 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 								type="file"
 							/>
 							<Button
+								className="border-dashed"
 								disabled={isUploadingPolicyPdf}
 								onClick={() => policyFileRef.current?.click()}
 								size="sm"
 								variant="outline"
-								className="border-dashed"
 							>
 								{isUploadingPolicyPdf ? (
 									<span className="flex items-center gap-2">
@@ -470,8 +495,18 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 									</span>
 								) : (
 									<>
-										<svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+										<svg
+											className="mr-2 h-4 w-4"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												strokeWidth={2}
+											/>
 										</svg>
 										Upload Policy PDF
 									</>
@@ -483,24 +518,33 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 						{/* PDF Metadata */}
 						{policyPdfMeta && (
 							<div className="space-y-2">
-								<div className="flex flex-wrap gap-3 rounded-lg bg-blue-50 p-2 text-xs text-blue-700">
-									<span>📄 {(policyPdfMeta.fileSize / 1024).toFixed(1)} KB</span>
+								<div className="flex flex-wrap gap-3 rounded-lg bg-blue-50 p-2 text-blue-700 text-xs">
+									<span>
+										📄 {(policyPdfMeta.fileSize / 1024).toFixed(1)} KB
+									</span>
 									<span>📃 {policyPdfMeta.numPages} pages</span>
-									<span>📝 {policyPdfMeta.textLength.toLocaleString()} chars</span>
+									<span>
+										📝 {policyPdfMeta.textLength.toLocaleString()} chars
+									</span>
 									<span>⏱️ {policyPdfMeta.parseTimeMs}ms</span>
 									{policyPdfMeta.method && (
-										<span className={`rounded px-1.5 py-0.5 ${
-											policyPdfMeta.method === "gemini-ocr" 
-												? "bg-purple-200 text-purple-800" 
-												: "bg-green-200 text-green-800"
-										}`}>
-											{policyPdfMeta.method === "gemini-ocr" ? "🤖 Gemini OCR" : "📖 Native"}
+										<span
+											className={`rounded px-1.5 py-0.5 ${
+												policyPdfMeta.method === "gemini-ocr"
+													? "bg-purple-200 text-purple-800"
+													: "bg-green-200 text-green-800"
+											}`}
+										>
+											{policyPdfMeta.method === "gemini-ocr"
+												? "🤖 Gemini OCR"
+												: "📖 Native"}
 										</span>
 									)}
 								</div>
 								{policyPdfMeta.textLength === 0 && (
-									<div className="rounded-lg bg-red-50 p-2 text-xs text-red-700">
-										⚠️ No text extracted! This PDF might be corrupted or completely empty.
+									<div className="rounded-lg bg-red-50 p-2 text-red-700 text-xs">
+										⚠️ No text extracted! This PDF might be corrupted or
+										completely empty.
 									</div>
 								)}
 							</div>
@@ -554,7 +598,9 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 							<div className="w-full border-gray-200 border-t" />
 						</div>
 						<div className="relative flex justify-center">
-							<span className="bg-white px-2 text-gray-400 text-xs">Clinical Documents (Optional)</span>
+							<span className="bg-white px-2 text-gray-400 text-xs">
+								Clinical Documents (Optional)
+							</span>
 						</div>
 					</div>
 
@@ -582,11 +628,11 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 								type="file"
 							/>
 							<Button
+								className="border-dashed"
 								disabled={isUploadingClinicalPdf}
 								onClick={() => clinicalFileRef.current?.click()}
 								size="sm"
 								variant="outline"
-								className="border-dashed"
 							>
 								{isUploadingClinicalPdf ? (
 									<span className="flex items-center gap-2">
@@ -595,8 +641,18 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 									</span>
 								) : (
 									<>
-										<svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+										<svg
+											className="mr-2 h-4 w-4"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												strokeWidth={2}
+											/>
 										</svg>
 										Upload Clinical PDF
 									</>
@@ -607,10 +663,14 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 
 						{/* PDF Metadata */}
 						{clinicalPdfMeta && (
-							<div className="flex gap-4 rounded-lg bg-emerald-50 p-2 text-xs text-emerald-700">
-								<span>📄 {(clinicalPdfMeta.fileSize / 1024).toFixed(1)} KB</span>
+							<div className="flex gap-4 rounded-lg bg-emerald-50 p-2 text-emerald-700 text-xs">
+								<span>
+									📄 {(clinicalPdfMeta.fileSize / 1024).toFixed(1)} KB
+								</span>
 								<span>📃 {clinicalPdfMeta.numPages} pages</span>
-								<span>📝 {clinicalPdfMeta.textLength.toLocaleString()} chars</span>
+								<span>
+									📝 {clinicalPdfMeta.textLength.toLocaleString()} chars
+								</span>
 							</div>
 						)}
 
@@ -641,7 +701,8 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 							</Button>
 							{clinicalParseResult && (
 								<span className="text-green-600 text-xs">
-									✓ Found {clinicalParseResult.pecIndicators.length} PEC indicators
+									✓ Found {clinicalParseResult.pecIndicators.length} PEC
+									indicators
 								</span>
 							)}
 						</div>
@@ -664,7 +725,7 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 				</CardHeader>
 				<CardContent>
 					<div className="rounded-lg bg-gray-50 p-4">
-						<pre className="overflow-auto font-mono text-xs text-gray-700">
+						<pre className="overflow-auto font-mono text-gray-700 text-xs">
 							{JSON.stringify(caseIntake, null, 2)}
 						</pre>
 					</div>
@@ -794,9 +855,8 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 								<div className="space-y-1.5 text-sm">
 									<ChecklistItem
 										checked={
-											ruleResult.signals.filter(
-												(s) => s.severity === "Blocker",
-											).length === 0
+											ruleResult.signals.filter((s) => s.severity === "Blocker")
+												.length === 0
 										}
 										label="No Blockers remaining"
 										ruleId="PS-8.1"
@@ -927,8 +987,8 @@ export function RuleEnginePanel({ glId, policyId }: RuleEnginePanelProps) {
 											Pre-Existing Condition Concerns
 										</h4>
 										<ul className="list-inside list-disc space-y-1 text-red-700 text-sm">
-											{finalReport.pec_concerns.map((concern, idx) => (
-												<li key={idx}>{concern}</li>
+											{finalReport.pec_concerns.map((concern) => (
+												<li key={concern}>{concern}</li>
 											))}
 										</ul>
 									</div>
@@ -987,4 +1047,3 @@ function ChecklistItem({
 		</div>
 	);
 }
-

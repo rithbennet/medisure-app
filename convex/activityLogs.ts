@@ -1,3 +1,4 @@
+import type { Doc } from "./_generated/dataModel";
 import { query } from "./_generated/server";
 
 export type ActivityLog = {
@@ -14,15 +15,13 @@ export const listActivity = query({
 		const logs = await ctx.db.query("activity_logs").collect();
 
 		return logs
-			.sort((a, b) => (b.createdAt as number) - (a.createdAt as number))
-			.map((log: any) => ({
+			.sort((a, b) => b.createdAt - a.createdAt)
+			.map((log: Doc<"activity_logs">) => ({
 				_id: log._id as string,
-				type: log.type as string,
-				message: log.message as string,
-				glId: log.glId as string | undefined,
-				createdAt: log.createdAt as number,
+				type: log.type,
+				message: log.message,
+				glId: log.glId,
+				createdAt: log.createdAt,
 			}));
 	},
 });
-
-

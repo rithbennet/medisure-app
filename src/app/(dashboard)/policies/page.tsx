@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useQuery } from 'convex/react';
+import { useQuery } from "convex/react";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from '@/components/ui/card';
-import { api } from '../../../../convex/_generated/api';
+} from "@/components/ui/card";
+import { api } from "../../../../convex/_generated/api";
 
 export default function PoliciesPage() {
 	const demoPolicies = useQuery(api.policies.listDemoPolicies, {});
@@ -20,13 +20,13 @@ export default function PoliciesPage() {
 			<section>
 				<Card className="bg-white shadow-soft-md">
 					<CardHeader>
-						<p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+						<p className="text-muted-foreground text-xs uppercase tracking-[0.3em]">
 							Policies
 						</p>
-						<CardTitle className="text-section-title text-gray-900">
+						<CardTitle className="text-gray-900 text-section-title">
 							Policy Library &amp; Q&amp;A
 						</CardTitle>
-						<CardDescription className="text-sm text-muted-foreground">
+						<CardDescription className="text-muted-foreground text-sm">
 							Upload insurer PDFs, index them, and ask natural language
 							questions during GL review.
 						</CardDescription>
@@ -46,11 +46,11 @@ export default function PoliciesPage() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 px-6 py-10 text-center">
-							<p className="text-sm font-medium text-gray-900">
+						<div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 border-dashed bg-gray-50 px-6 py-10 text-center">
+							<p className="font-medium text-gray-900 text-sm">
 								Policy upload coming soon
 							</p>
-							<p className="max-w-md text-sm text-muted-foreground">
+							<p className="max-w-md text-muted-foreground text-sm">
 								In the full implementation, this dropzone will send PDFs to a
 								Convex action that chunks and indexes each policy for Q&amp;A.
 							</p>
@@ -79,31 +79,31 @@ export default function PoliciesPage() {
 										className="rounded-xl border border-gray-200 bg-white p-4 shadow-soft"
 										key={policy.id}
 									>
-										<p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
+										<p className="font-semibold text-blue-600 text-xs uppercase tracking-[0.2em]">
 											Demo Policy
 										</p>
-										<p className="mt-2 text-sm font-semibold text-gray-900">
+										<p className="mt-2 font-semibold text-gray-900 text-sm">
 											{policy.productName}
 										</p>
-										<p className="mt-1 text-xs text-muted-foreground">
+										<p className="mt-1 text-muted-foreground text-xs">
 											Plan type: {policy.planType}
 										</p>
-										<p className="mt-1 text-xs text-muted-foreground">
+										<p className="mt-1 text-muted-foreground text-xs">
 											Insurer: {policy.insurerName}
 										</p>
 									</div>
 								))
 							) : (
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									Loading demo policies from Convex&hellip;
 								</p>
 							)}
 						</div>
-						<div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-muted-foreground">
+						<div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 text-muted-foreground text-sm">
 							<p className="font-medium text-gray-900">Policy Q&amp;A</p>
 							<p className="mt-1 text-xs">
-								A question box and AI answers will appear here once wired to
-								the Convex RAG index.
+								A question box and AI answers will appear here once wired to the
+								Convex RAG index.
 							</p>
 						</div>
 					</CardContent>
@@ -112,4 +112,3 @@ export default function PoliciesPage() {
 		</div>
 	);
 }
-
