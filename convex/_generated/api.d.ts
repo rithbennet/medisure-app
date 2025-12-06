@@ -10,8 +10,10 @@
 
 import type * as activityLogs from "../activityLogs.js";
 import type * as admin from "../admin.js";
+import type * as documentIngestion from "../documentIngestion.js";
 import type * as glRequests from "../glRequests.js";
 import type * as policies from "../policies.js";
+import type * as rulesEngine from "../rulesEngine.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 import type * as utils_activityLog from "../utils/activityLog.js";
@@ -26,8 +28,10 @@ import type {
 declare const fullApi: ApiFromModules<{
   activityLogs: typeof activityLogs;
   admin: typeof admin;
+  documentIngestion: typeof documentIngestion;
   glRequests: typeof glRequests;
   policies: typeof policies;
+  rulesEngine: typeof rulesEngine;
   seed: typeof seed;
   users: typeof users;
   "utils/activityLog": typeof utils_activityLog;

@@ -1,6 +1,7 @@
 import { getSignUpUrl, withAuth } from "@workos-inc/authkit-nextjs";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -8,7 +9,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 const problemBullets = [
 	"99% of specialists face insurer/TPA interference in clinical decisions (CodeBlue 2025).",
@@ -19,7 +19,8 @@ const problemBullets = [
 const benefits = [
 	{
 		title: "Auto-GL Risk Analysis",
-		description: "Instantly flags high-risk cases and pre-existing condition issues.",
+		description:
+			"Instantly flags high-risk cases and pre-existing condition issues.",
 	},
 	{
 		title: "Policy Intelligence (RAG)",
@@ -61,7 +62,7 @@ export default async function HomePage() {
 
 	return (
 		<div className="min-h-screen bg-gray-50 text-foreground">
-			<header className="absolute top-0 left-0 right-0 z-50 bg-transparent">
+			<header className="absolute top-0 right-0 left-0 z-50 bg-transparent">
 				<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
 					<div className="flex items-center gap-3">
 						<Image
@@ -101,12 +102,9 @@ export default async function HomePage() {
 			</header>
 
 			<main>
-				<section
-					className="relative overflow-hidden gradient-purple"
-					id="hero"
-				>
+				<section className="gradient-purple relative overflow-hidden" id="hero">
 					<div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 pt-32 pb-20 text-center">
-						<h1 className="text-hero text-gray-900 tracking-tight">
+						<h1 className="text-gray-900 text-hero tracking-tight">
 							Radically faster GL processing
 						</h1>
 						<div className="space-y-2 text-lg text-muted-foreground">
@@ -140,21 +138,18 @@ export default async function HomePage() {
 								</Link>
 							</Button>
 						</div>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-muted-foreground text-xs">
 							Demo only — no real patient data.
 						</p>
 					</div>
 				</section>
 
-				<section
-					className="mx-auto max-w-5xl px-6 py-16"
-					id="problem"
-				>
+				<section className="mx-auto max-w-5xl px-6 py-16" id="problem">
 					<div className="mb-8 space-y-4">
-						<p className="uppercase text-xs tracking-widest text-muted-foreground">
+						<p className="text-muted-foreground text-xs uppercase tracking-widest">
 							The Problem
 						</p>
-						<h2 className="text-section-title max-w-3xl text-gray-900">
+						<h2 className="max-w-3xl text-gray-900 text-section-title">
 							The GL process in Malaysia is slow, manual, and unpredictable.
 						</h2>
 					</div>
@@ -170,16 +165,13 @@ export default async function HomePage() {
 					</Card>
 				</section>
 
-				<section
-					className="bg-white/70 py-16"
-					id="benefits"
-				>
+				<section className="bg-white/70 py-16" id="benefits">
 					<div className="mx-auto flex max-w-5xl flex-col gap-10 px-6">
 						<div className="space-y-4 text-center">
-							<p className="uppercase text-xs tracking-widest text-muted-foreground">
+							<p className="text-muted-foreground text-xs uppercase tracking-widest">
 								What Medisure Does
 							</p>
-							<h2 className="text-section-title text-gray-900">
+							<h2 className="text-gray-900 text-section-title">
 								Three simple ways Medisure automates GL work
 							</h2>
 						</div>
@@ -208,10 +200,10 @@ export default async function HomePage() {
 				>
 					<div className="mx-auto flex max-w-4xl flex-col gap-10 text-center">
 						<div className="space-y-4">
-							<p className="uppercase text-xs tracking-widest text-muted-foreground">
+							<p className="text-muted-foreground text-xs uppercase tracking-widest">
 								Demo Entry Paths
 							</p>
-							<h2 className="text-section-title text-gray-900">
+							<h2 className="text-gray-900 text-section-title">
 								Choose how you enter the Medisure demo
 							</h2>
 						</div>
@@ -239,10 +231,10 @@ export default async function HomePage() {
 				<section className="bg-white px-6 py-16">
 					<div className="mx-auto flex max-w-5xl flex-col gap-10">
 						<div className="space-y-4 text-center">
-							<p className="uppercase text-xs tracking-widest text-muted-foreground">
+							<p className="text-muted-foreground text-xs uppercase tracking-widest">
 								How It Works
 							</p>
-							<h2 className="text-section-title text-gray-900">
+							<h2 className="text-gray-900 text-section-title">
 								Three simple steps to simulate a GL decision
 							</h2>
 						</div>
@@ -250,7 +242,7 @@ export default async function HomePage() {
 							{howItWorks.map((step, index) => (
 								<Card className="relative h-full shadow-soft" key={step.title}>
 									<CardHeader className="space-y-4">
-										<div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
+										<div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-600 text-sm">
 											{index + 1}
 										</div>
 										<CardTitle className="text-card-title text-gray-900">
@@ -270,7 +262,7 @@ export default async function HomePage() {
 
 				<section className="bg-gray-50 px-6 py-16">
 					<div className="mx-auto flex max-w-4xl flex-col items-center gap-6 text-center">
-						<p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+						<p className="text-muted-foreground text-sm uppercase tracking-[0.3em]">
 							Tech Stack
 						</p>
 						<p className="text-lg text-muted-foreground">
@@ -279,7 +271,7 @@ export default async function HomePage() {
 						<div className="flex flex-wrap items-center justify-center gap-4">
 							{techStack.map((tech) => (
 								<span
-									className="rounded-full border border-gray-200 bg-white px-5 py-2 text-sm text-gray-900 shadow-soft"
+									className="rounded-full border border-gray-200 bg-white px-5 py-2 text-gray-900 text-sm shadow-soft"
 									key={tech}
 								>
 									{tech}
@@ -290,8 +282,8 @@ export default async function HomePage() {
 				</section>
 			</main>
 
-			<footer className="border-t border-gray-200 bg-white">
-				<div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+			<footer className="border-gray-200 border-t bg-white">
+				<div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 text-muted-foreground text-sm md:flex-row md:items-center md:justify-between">
 					<span>Medisure — Smart GL Automation</span>
 					<span>Medisure Team</span>
 					<span>© 2025</span>

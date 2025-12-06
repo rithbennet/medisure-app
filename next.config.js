@@ -5,6 +5,13 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+	// Increase body size limit for PDF uploads (default is 1mb, increase to 10mb)
+	experimental: {
+		serverActions: {
+			bodySizeLimit: "10mb",
+		},
+	},
+};
 
 export default config;
