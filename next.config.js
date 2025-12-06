@@ -11,10 +11,12 @@ const config = {
 		serverActions: {
 			bodySizeLimit: "50mb",
 		},
+		// @ts-ignore - proxyClientMaxBodySize is a valid experimental option
+		proxyClientMaxBodySize: "50mb",
+		// Allow larger body sizes through middleware (for file uploads)
+		// This must be in experimental section according to Next.js docs
+		middlewareClientMaxBodySize: "50mb",
 	},
-	// Allow larger body sizes through middleware (for file uploads)
-	// @ts-ignore - This is a valid Next.js config option
-	middlewareClientMaxBodySize: "50mb",
 };
 
 export default config;
